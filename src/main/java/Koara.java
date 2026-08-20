@@ -7,7 +7,7 @@ public class Koara {
     private static final String RESPONSE_INDENT = LINE_INDENT + " ";
     private static final String HORIZONTAL_LINE = LINE_INDENT + "_".repeat(60);
 
-    // Starts a Koara interactive session for adding, listing, marking, and unmarking tasks
+    // Starts a Koara interactive session for managing todos, deadlines, and events.
     public static void main(String[] args) {
         String banner = """
                  _  __  ___      _      ____       _
@@ -52,12 +52,41 @@ public class Koara {
                     System.out.println(RESPONSE_INDENT + "OK, I've marked this task as not done yet:");
                     System.out.println(RESPONSE_INDENT + "  " + tasks[taskIndex]);
                 } else {
-                    tasks[taskCount] = new Task(command); // add new Task object to list
+                    Task task = parseTask(command);
+                    tasks[taskCount] = task; // add new Task object to list
                     taskCount++;
-                    System.out.println(RESPONSE_INDENT + "added: " + command);
+                    System.out.println(RESPONSE_INDENT + "Got it. I've added this task:");
+                    System.out.println(RESPONSE_INDENT + "  " + task);
+                    System.out.println(RESPONSE_INDENT + "Now you have " + taskCount + " tasks in the list.");
                 }
                 System.out.println(HORIZONTAL_LINE);
             }
         }
+    }
+
+    // Converts a valid Level 4 task command into a task before implementing inheritance.
+    // Date and time information is kept as text as required.
+    private static Task parseTask(String command) {
+        if (command.startsWith("todo ")) {
+            String description = command.substring("todo ".length());
+            return new Task("T", description, "");
+        }
+
+        if (command.startsWith("deadline ")) {
+            String taskDetails = command.substring("deadline ".length());
+            int bySeparatorIndex = taskDetails.indexOf(" /by "); // find deadline information
+            String description = taskDetails.substring(0, bySeparatorIndex);
+            String by = taskDetails.substring(bySeparatorIndex + " /by ".length()); // deadline
+            return new Task("D", description, " (by: " + by + ")");
+        }
+
+        // else (starts with event)
+        String taskDetails = command.substring("event ".length());
+        int fromSeparatorIndex = taskDetails.indexOf(" /from "); // find from time
+        int toSeparatorIndex = taskDetails.indexOf(" /to ", fromSeparatorIndex + " /from ".length()); // find to time
+        String description = taskDetails.substring(0, fromSeparatorIndex);
+        String from = taskDetails.substring(fromSeparatorIndex + " /from ".length(), toSeparatorIndex);
+        String to = taskDetails.substring(toSeparatorIndex + " /to ".length());
+        return new Task("E", description, " (from: " + from + " to: " + to + ")");
     }
 }

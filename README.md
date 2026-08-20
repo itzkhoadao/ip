@@ -1,6 +1,6 @@
 # Koara
 
-Koara is a personal assistant chatbot built incrementally as part of the CS2103T individual project. At Level 3, Koara can store tasks for the current session, display their completion status, and mark or unmark them. Given below are instructions on how to set it up.
+Koara is a personal assistant chatbot built incrementally as part of the CS2103T individual project. At Level 4, Koara can track todos, deadlines, and events, display their completion status, and mark or unmark them. Given below are instructions on how to set it up.
 
 ## Setting up in Intellij
 
@@ -14,7 +14,7 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
 1. Configure the project to use **JDK 25** (not other versions) as explained in [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).<br>
    In the same dialog, set the **Project language level** field to the `SDK default` option.
 1. After that, locate the `src/main/java/Koara.java` file, right-click it, and choose `Run Koara.main()` (if the code editor is showing compile errors, try restarting the IDE). If the setup is correct, Koara should start an interactive session like the one below.
-   Enter any text to add it as a task, `list` to view all tasks, `mark NUMBER` to mark a task, `unmark NUMBER` to reverse its status, or `bye` to exit. Tasks are kept in memory only and are not saved after the program ends. Below is an example of how we can use Koara.
+   Use `todo DESCRIPTION` to add a todo, `deadline DESCRIPTION /by DATE_OR_TIME` to add a deadline, or `event DESCRIPTION /from START /to END` to add an event. Dates and times are kept as text. Enter `list` to view all tasks, `mark NUMBER` to mark a task, `unmark NUMBER` to reverse its status, or `bye` to exit. Tasks are kept in memory only and are not saved after the program ends. Below is an example of how we can use Koara.
    ```
        ____________________________________________________________
          _  __  ___      _      ____       _
@@ -25,29 +25,40 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
         Hello! I'm Koara.
         What can I do for you?
        ____________________________________________________________
-   read book
+   todo read book
        ____________________________________________________________
-        added: read book
+        Got it. I've added this task:
+          [T][ ] read book
+        Now you have 1 tasks in the list.
        ____________________________________________________________
-   return book
+   deadline return book /by Sunday
        ____________________________________________________________
-        added: return book
+        Got it. I've added this task:
+          [D][ ] return book (by: Sunday)
+        Now you have 2 tasks in the list.
+       ____________________________________________________________
+   event project meeting /from Mon 2pm /to 4pm
+       ____________________________________________________________
+        Got it. I've added this task:
+          [E][ ] project meeting (from: Mon 2pm to: 4pm)
+        Now you have 3 tasks in the list.
        ____________________________________________________________
    list
        ____________________________________________________________
         Here are the tasks in your list:
-        1.[ ] read book
-        2.[ ] return book
+        1.[T][ ] read book
+        2.[D][ ] return book (by: Sunday)
+        3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
        ____________________________________________________________
    mark 2
        ____________________________________________________________
         Nice! I've marked this task as done:
-          [X] return book
+          [D][X] return book (by: Sunday)
        ____________________________________________________________
    unmark 2
        ____________________________________________________________
         OK, I've marked this task as not done yet:
-          [ ] return book
+          [D][ ] return book (by: Sunday)
        ____________________________________________________________
    bye
        ____________________________________________________________

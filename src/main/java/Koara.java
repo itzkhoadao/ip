@@ -69,7 +69,7 @@ public class Koara {
     private static Task parseTask(String command) {
         if (command.startsWith("todo ")) {
             String description = command.substring("todo ".length());
-            return new Task("T", description, "");
+            return new Todo(description);
         }
 
         if (command.startsWith("deadline ")) {
@@ -77,7 +77,7 @@ public class Koara {
             int bySeparatorIndex = taskDetails.indexOf(" /by "); // find deadline information
             String description = taskDetails.substring(0, bySeparatorIndex);
             String by = taskDetails.substring(bySeparatorIndex + " /by ".length()); // deadline
-            return new Task("D", description, " (by: " + by + ")");
+            return new Deadline(description, by);
         }
 
         // else (starts with event)
@@ -87,6 +87,6 @@ public class Koara {
         String description = taskDetails.substring(0, fromSeparatorIndex);
         String from = taskDetails.substring(fromSeparatorIndex + " /from ".length(), toSeparatorIndex);
         String to = taskDetails.substring(toSeparatorIndex + " /to ".length());
-        return new Task("E", description, " (from: " + from + " to: " + to + ")");
+        return new Event(description, from, to);
     }
 }

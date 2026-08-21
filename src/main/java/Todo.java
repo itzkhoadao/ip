@@ -2,6 +2,6 @@
 public class Todo extends Task {
     // Creates an incomplete task of type todo
     public Todo(String description) {
-        super("T", description, "");
+        super(TaskType.TODO, description, "");
     }
 }

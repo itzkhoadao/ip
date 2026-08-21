@@ -4,7 +4,7 @@ public class Deadline extends Task {
 
     // Creates an incomplete deadline.
     public Deadline(String description, String by) {
-        super("D", description, "");
+        super(TaskType.DEADLINE, description, "");
         this.by = by;
     }
 

@@ -5,7 +5,7 @@ public class Event extends Task {
 
     // Creates an incomplete event.
     public Event(String description, String from, String to) {
-        super("E", description, "");
+        super(TaskType.EVENT, description, "");
         this.from = from;
         this.to = to;
     }

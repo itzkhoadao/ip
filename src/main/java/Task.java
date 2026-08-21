@@ -1,13 +1,13 @@
 // This class represents a task with a description and completion status
 public class Task {
-    private final String typeIcon;
+    private final TaskType taskType;
     private final String description;
     private final String additionalInformation;
     private boolean isDone;
 
     // Creates an incomplete task with its display type and optional timing information.
-    public Task(String typeIcon, String description, String additionalInformation) {
-        this.typeIcon = typeIcon;
+    public Task(TaskType taskType, String description, String additionalInformation) {
+        this.taskType = taskType;
         this.description = description;
         this.additionalInformation = additionalInformation;
         this.isDone = false;
@@ -31,6 +31,6 @@ public class Task {
     // Returns the string display form of this task (display according to Level 4's style)
     @Override
     public String toString() {
-        return "[" + typeIcon + "][" + getStatusIcon() + "] " + description + additionalInformation;
+        return "[" + taskType.getIcon() + "][" + getStatusIcon() + "] " + description + additionalInformation;
     }
 }

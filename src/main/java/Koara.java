@@ -1,8 +1,8 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 // Runs the Koara chatbot
 public class Koara {
-    private static final int MAX_TASKS = 100;
     private static final String LINE_INDENT = "    ";
     private static final String RESPONSE_INDENT = LINE_INDENT + " ";
     private static final String HORIZONTAL_LINE = LINE_INDENT + "_".repeat(60);
@@ -22,8 +22,7 @@ public class Koara {
         System.out.println(RESPONSE_INDENT + "What can I do for you?");
         System.out.println(HORIZONTAL_LINE);
 
-        Task[] tasks = new Task[MAX_TASKS]; // new array of Task objects
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<>(); // new ArrayList of Task objects
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
@@ -40,29 +39,31 @@ public class Koara {
                 try {
                     if (command.equals("list")) {
                         System.out.println(RESPONSE_INDENT + "Here are the tasks in your list:");
-                        for (int i = 0; i < taskCount; i++) {
-                            System.out.println(RESPONSE_INDENT + (i + 1) + "." + tasks[i]);
+                        for (int i = 0; i < tasks.size(); i++) {
+                            System.out.println(RESPONSE_INDENT + (i + 1) + "." + tasks.get(i));
                         }
                     } else if (command.equals("mark") || command.startsWith("mark ")) {
-                        int taskIndex = parseTaskIndex(command, "mark", taskCount); // get the index of the task being marked
-                        tasks[taskIndex].markAsDone(); // mark as done
+                        int taskIndex = parseTaskIndex(command, "mark", tasks.size()); // get the index of the task being marked
+                        tasks.get(taskIndex).markAsDone(); // mark as done
                         System.out.println(RESPONSE_INDENT + "Nice! I've marked this task as done:");
-                        System.out.println(RESPONSE_INDENT + "  " + tasks[taskIndex]);
+                        System.out.println(RESPONSE_INDENT + "  " + tasks.get(taskIndex));
                     } else if (command.equals("unmark") || command.startsWith("unmark ")) {
-                        int taskIndex = parseTaskIndex(command, "unmark", taskCount); // get the index of the task being unmarked
-                        tasks[taskIndex].markAsNotDone(); // mark as not done
+                        int taskIndex = parseTaskIndex(command, "unmark", tasks.size()); // get the index of the task being unmarked
+                        tasks.get(taskIndex).markAsNotDone(); // mark as not done
                         System.out.println(RESPONSE_INDENT + "OK, I've marked this task as not done yet:");
-                        System.out.println(RESPONSE_INDENT + "  " + tasks[taskIndex]);
+                        System.out.println(RESPONSE_INDENT + "  " + tasks.get(taskIndex));
+                    } else if (command.equals("delete") || command.startsWith("delete ")) {
+                        int taskIndex = parseTaskIndex(command, "delete", tasks.size()); // get the index of the task being deleted
+                        Task removedTask = tasks.remove(taskIndex); // delete the selected task from the list, save the deleted task to print it later
+                        System.out.println(RESPONSE_INDENT + "Noted. I've removed this task:");
+                        System.out.println(RESPONSE_INDENT + "  " + removedTask);
+                        System.out.println(RESPONSE_INDENT + "Now you have " + tasks.size() + " tasks in the list.");
                     } else { // related to commands that add new tasks
                         Task task = parseTask(command);
-                        if (taskCount >= MAX_TASKS) {
-                            throw new KoaraException("Sorry bro!!! The task list is full already.");
-                        }
-                        tasks[taskCount] = task; // add new Task object to list
-                        taskCount++;
+                        tasks.add(task); // add new Task object to list
                         System.out.println(RESPONSE_INDENT + "Got it. I've added this task:");
                         System.out.println(RESPONSE_INDENT + "  " + task); // print the task in appropriate string format
-                        System.out.println(RESPONSE_INDENT + "Now you have " + taskCount + " tasks in the list.");
+                        System.out.println(RESPONSE_INDENT + "Now you have " + tasks.size() + " tasks in the list.");
                     }
                 } catch (KoaraException exception) {
                     System.out.println(RESPONSE_INDENT + exception.getMessage());
@@ -137,8 +138,8 @@ public class Koara {
         return new Event(description, from, to);
     }
 
-    // Validates a task number and converts it from the displayed one-based number to an array index.
-    // For example, "mark 2", this function will extract 2, validate the number 2, and return 1 (array index).
+    // Validates a task number and converts it from the displayed one-based number to a list index.
+    // For example, "mark 2", this function will extract 2, validate the number 2, and return 1 (list index).
     private static int parseTaskIndex(String command, String action, int taskCount) throws KoaraException {
         String taskNumberText = command.substring(action.length()).trim();
         if (taskNumberText.isEmpty()) {

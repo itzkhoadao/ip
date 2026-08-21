@@ -74,10 +74,10 @@ bye
      What can I do for you?
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! The description of a todo cannot be empty.
+     Unlucky!!! The description of a todo task cannot be empty. Try typing something more.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! I'm sorry, but I don't know what that means :-(
+     What is that bro!!! Sorry ah, I don't know what that means :-(
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
@@ -85,7 +85,7 @@ bye
      Now you have 1 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! I'm sorry, but I don't know what that means :-(
+     What is that bro!!! Sorry ah, I don't know what that means :-(
     ____________________________________________________________
     ____________________________________________________________
      Here are the tasks in your list:
@@ -182,13 +182,13 @@ bye
      Now you have 1 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! The description of a deadline cannot be empty.
+     Error error!!! The description of a deadline task cannot be empty. Try typing something more.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! A deadline needs a /by date or time.
+     Sorry, this cannot!!! A deadline task needs a /by date or time.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! A deadline needs a /by date or time.
+     Sorry, this cannot!!! A deadline task needs a /by date or time.
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
@@ -196,16 +196,16 @@ bye
      Now you have 2 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! The description of an event cannot be empty.
+     Your bad!!! The description of an event task cannot be empty. Try typing something more.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! An event needs /from and /to dates or times.
+     Retry retry!!! An event task needs /from and /to dates or times.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! An event needs /from and /to dates or times.
+     Wrong input!!! An event task needs /from and /to dates or times.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! An event needs /from and /to dates or times.
+     Retry retry!!! An event task needs /from and /to dates or times.
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
@@ -324,37 +324,175 @@ bye
      Now you have 2 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! Please specify a task number to mark.
+     Sorry for the inconvenience!!! Please specify a task number to mark.
     ____________________________________________________________
     ____________________________________________________________
      OOPS!!! The task number must be a whole number.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! That task number does not exist.
+     Are you crazy!!! That task number does not exist.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! That task number does not exist.
+     Are you crazy!!! That task number does not exist.
     ____________________________________________________________
     ____________________________________________________________
      Nice! I've marked this task as done:
        [T][X] second
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! Please specify a task number to unmark.
+     Sorry for the inconvenience!!! Please specify a task number to unmark.
     ____________________________________________________________
     ____________________________________________________________
      OOPS!!! The task number must be a whole number.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! That task number does not exist.
+     Are you crazy!!! That task number does not exist.
     ____________________________________________________________
     ____________________________________________________________
-     OOPS!!! That task number does not exist.
+     Are you crazy!!! That task number does not exist.
     ____________________________________________________________
     ____________________________________________________________
      Here are the tasks in your list:
      1.[T][ ] first
      2.[T][X] second
+    ____________________________________________________________
+    ____________________________________________________________
+     Bye. Koara hopes to see you again soon!
+    ____________________________________________________________
+```
+
+## TC-07: Delete a task from the middle of the list
+
+### Aim
+
+Verify the exact Level 6 deletion confirmation, updated task count, and renumbering of tasks after the deleted task.
+
+### Inputs
+
+```text
+todo read book
+deadline return book /by June 6th
+event project meeting /from Aug 6th 2pm /to 4pm
+todo join sports club
+todo borrow book
+list
+delete 3
+list
+bye
+```
+
+### Expected output
+
+```text
+    ____________________________________________________________
+      _  __  ___      _      ____       _
+     | |/ / / _ \    / \    |  _ \     / \
+     | ' / | | | |  / _ \   | |_) |   / _ \
+     | . \ | |_| | / ___ \  |  _ <   / ___ \
+     |_|\_\ \___/ /_/   \_\ |_| \_\ /_/   \_\
+     Hello! I'm Koara.
+     What can I do for you?
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+       [T][ ] read book
+     Now you have 1 tasks in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+       [D][ ] return book (by: June 6th)
+     Now you have 2 tasks in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+       [E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+     Now you have 3 tasks in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+       [T][ ] join sports club
+     Now you have 4 tasks in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+       [T][ ] borrow book
+     Now you have 5 tasks in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1.[T][ ] read book
+     2.[D][ ] return book (by: June 6th)
+     3.[E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+     4.[T][ ] join sports club
+     5.[T][ ] borrow book
+    ____________________________________________________________
+    ____________________________________________________________
+     Noted. I've removed this task:
+       [E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+     Now you have 4 tasks in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1.[T][ ] read book
+     2.[D][ ] return book (by: June 6th)
+     3.[T][ ] join sports club
+     4.[T][ ] borrow book
+    ____________________________________________________________
+    ____________________________________________________________
+     Bye. Koara hopes to see you again soon!
+    ____________________________________________________________
+```
+
+## TC-08: Reject invalid delete task numbers
+
+### Aim
+
+Verify that missing, non-numeric, zero, and out-of-range delete task numbers display errors and leave the task list unchanged.
+
+### Inputs
+
+```text
+todo keep this task
+delete
+delete abc
+delete 0
+delete 2
+list
+bye
+```
+
+### Expected output
+
+```text
+    ____________________________________________________________
+      _  __  ___      _      ____       _
+     | |/ / / _ \    / \    |  _ \     / \
+     | ' / | | | |  / _ \   | |_) |   / _ \
+     | . \ | |_| | / ___ \  |  _ <   / ___ \
+     |_|\_\ \___/ /_/   \_\ |_| \_\ /_/   \_\
+     Hello! I'm Koara.
+     What can I do for you?
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+       [T][ ] keep this task
+     Now you have 1 tasks in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Sorry for the inconvenience!!! Please specify a task number to delete.
+    ____________________________________________________________
+    ____________________________________________________________
+     OOPS!!! The task number must be a whole number.
+    ____________________________________________________________
+    ____________________________________________________________
+     Are you crazy!!! That task number does not exist.
+    ____________________________________________________________
+    ____________________________________________________________
+     Are you crazy!!! That task number does not exist.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1.[T][ ] keep this task
     ____________________________________________________________
     ____________________________________________________________
      Bye. Koara hopes to see you again soon!

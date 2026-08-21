@@ -1,6 +1,6 @@
 # Koara
 
-Koara is a personal assistant chatbot built incrementally as part of the CS2103T individual project. At Level 5, Koara can track todos, deadlines, and events, display their completion status, mark or unmark them, and report invalid commands without ending the session. Given below are instructions on how to set it up.
+Koara is a personal assistant chatbot built incrementally as part of the CS2103T individual project. At Level 6, Koara can track todos, deadlines, and events, display their completion status, mark, unmark, or delete them, and report invalid commands without ending the session. Given below are instructions on how to set it up.
 
 ## Setting up in Intellij
 
@@ -14,7 +14,7 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
 1. Configure the project to use **JDK 25** (not other versions) as explained in [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).<br>
    In the same dialog, set the **Project language level** field to the `SDK default` option.
 1. After that, locate the `src/main/java/Koara.java` file, right-click it, and choose `Run Koara.main()` (if the code editor is showing compile errors, try restarting the IDE). If the setup is correct, Koara should start an interactive session like the one below.
-   Use `todo DESCRIPTION` to add a todo, `deadline DESCRIPTION /by DATE_OR_TIME` to add a deadline, or `event DESCRIPTION /from START /to END` to add an event. Dates and times are kept as text. Enter `list` to view all tasks, `mark NUMBER` to mark a task, `unmark NUMBER` to reverse its status, or `bye` to exit. Invalid or incomplete commands produce a specific `OOPS!!!` message and do not change the task list. Tasks are kept in memory only and are not saved after the program ends. Below is an example of how we can use Koara.
+   Use `todo DESCRIPTION` to add a todo, `deadline DESCRIPTION /by DATE_OR_TIME` to add a deadline, or `event DESCRIPTION /from START /to END` to add an event. Dates and times are kept as text. Enter `list` to view all tasks, `mark NUMBER` to mark a task, `unmark NUMBER` to reverse its status, `delete NUMBER` to remove a task, or `bye` to exit. Invalid or incomplete commands display an error message and do not change the task list. Tasks are stored in an `ArrayList` while Koara is running, but are not saved after the program ends. Below is an example of how we can use Koara.
    ```
        ____________________________________________________________
          _  __  ___      _      ____       _
@@ -27,11 +27,11 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
        ____________________________________________________________
    todo
        ____________________________________________________________
-        OOPS!!! The description of a todo cannot be empty.
+        Unlucky!!! The description of a todo task cannot be empty. Try typing something more.
        ____________________________________________________________
    blah
        ____________________________________________________________
-        OOPS!!! I'm sorry, but I don't know what that means :-(
+        What is that bro!!! Sorry ah, I don't know what that means :-(
        ____________________________________________________________
    todo read book
        ____________________________________________________________
@@ -67,6 +67,12 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
        ____________________________________________________________
         OK, I've marked this task as not done yet:
           [D][ ] return book (by: Sunday)
+       ____________________________________________________________
+   delete 3
+       ____________________________________________________________
+        Noted. I've removed this task:
+          [E][ ] project meeting (from: Mon 2pm to: 4pm)
+        Now you have 2 tasks in the list.
        ____________________________________________________________
    bye
        ____________________________________________________________

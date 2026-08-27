@@ -1,6 +1,9 @@
-package koara;
+package koara.ui;
 
 import java.util.Scanner;
+
+import koara.task.Task;
+import koara.task.TaskList;
 
 /**
  * Handles interactions between Koara and the user.

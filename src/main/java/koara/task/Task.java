@@ -1,4 +1,4 @@
-package koara;
+package koara.task;
 
 /**
  * Represents a task with a description and completion status.

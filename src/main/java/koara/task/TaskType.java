@@ -1,4 +1,4 @@
-package koara;
+package koara.task;
 
 /**
  * Represents the supported task categories and their display icons.

@@ -1,4 +1,4 @@
-package koara;
+package koara.task;
 
 /**
  * Represents a task without any date or time information.

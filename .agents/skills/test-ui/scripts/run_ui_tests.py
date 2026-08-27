@@ -136,7 +136,7 @@ def main() -> int:
         passed = 0
         for test_case in cases:
             result = subprocess.run(
-                ["java", "-cp", class_directory, "Koara"],
+                ["java", "-cp", class_directory, "koara.Koara"],
                 cwd=project_root,
                 input=test_case.inputs,
                 capture_output=True,

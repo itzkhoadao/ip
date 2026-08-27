@@ -1,20 +1,27 @@
 package koara;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 /**
- * Represents a task that takes place between a start and end date or time.
+ * Represents a task that takes place between a start and end date.
  */
 public class Event extends Task {
-    private final String from;
-    private final String to;
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("MMM dd yyyy", Locale.ENGLISH);
+
+    private final LocalDate from;
+    private final LocalDate to;
 
     /**
      * Creates an incomplete event.
      *
      * @param description Description of the event.
-     * @param from Start date or time of the event.
-     * @param to End date or time of the event.
+     * @param from Start date of the event.
+     * @param to End date of the event.
      */
-    public Event(String description, String from, String to) {
+    public Event(String description, LocalDate from, LocalDate to) {
         super(TaskType.EVENT, description, "");
         this.from = from;
         this.to = to;
@@ -22,7 +29,8 @@ public class Event extends Task {
 
     @Override
     public String toString() {
-        return super.toString() + " (from: " + from + " to: " + to + ")";
+        return super.toString() + " (from: " + from.format(DISPLAY_DATE_FORMAT)
+                + " to: " + to.format(DISPLAY_DATE_FORMAT) + ")";
     }
 
     /**

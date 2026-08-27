@@ -100,12 +100,12 @@ bye
 
 ### Aim
 
-Verify that deadline text remains unchanged and the type icon is retained when a valid task number is marked and unmarked.
+Verify that a formatted deadline and its type icon are retained when a valid task number is marked and unmarked.
 
 ### Inputs
 
 ```text
-deadline do homework /by no idea :-p
+deadline do homework /by 2026-08-28
 mark 1
 unmark 1
 bye
@@ -125,16 +125,16 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-       [D][ ] do homework (by: no idea :-p)
+       [D][ ] do homework (by: Aug 28 2026)
      Now you have 1 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
      Nice! I've marked this task as done:
-       [D][X] do homework (by: no idea :-p)
+       [D][X] do homework (by: Aug 28 2026)
     ____________________________________________________________
     ____________________________________________________________
      OK, I've marked this task as not done yet:
-       [D][ ] do homework (by: no idea :-p)
+       [D][ ] do homework (by: Aug 28 2026)
     ____________________________________________________________
     ____________________________________________________________
      Bye. Koara hopes to see you again soon!
@@ -154,12 +154,14 @@ todo first valid
 deadline /by Sunday
 deadline missing timing
 deadline empty time /by
-deadline second valid /by Friday
+deadline invalid date /by Friday
+deadline second valid /by 2026-09-05
 event /from 2pm /to 3pm
 event missing end /from 2pm
 event empty start /from  /to 3pm
 event empty end /from 2pm /to
-event third valid /from Sat /to Sun
+event invalid date /from Saturday /to 2026-09-06
+event third valid /from 2026-09-05 /to 2026-09-06
 list
 bye
 ```
@@ -191,8 +193,11 @@ bye
      Sorry, this cannot!!! A deadline task needs a /by date or time.
     ____________________________________________________________
     ____________________________________________________________
+     Wrong date format!!! Please use yyyy-MM-dd.
+    ____________________________________________________________
+    ____________________________________________________________
      Got it. I've added this task:
-       [D][ ] second valid (by: Friday)
+       [D][ ] second valid (by: Sep 05 2026)
      Now you have 2 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
@@ -208,15 +213,18 @@ bye
      Retry retry!!! An event task needs /from and /to dates or times.
     ____________________________________________________________
     ____________________________________________________________
+     Wrong date format!!! Please use yyyy-MM-dd.
+    ____________________________________________________________
+    ____________________________________________________________
      Got it. I've added this task:
-       [E][ ] third valid (from: Sat to: Sun)
+       [E][ ] third valid (from: Sep 05 2026 to: Sep 06 2026)
      Now you have 3 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
      Here are the tasks in your list:
      1.[T][ ] first valid
-     2.[D][ ] second valid (by: Friday)
-     3.[E][ ] third valid (from: Sat to: Sun)
+     2.[D][ ] second valid (by: Sep 05 2026)
+     3.[E][ ] third valid (from: Sep 05 2026 to: Sep 06 2026)
     ____________________________________________________________
     ____________________________________________________________
      Bye. Koara hopes to see you again soon!
@@ -227,14 +235,14 @@ bye
 
 ### Aim
 
-Verify todo, deadline, and event parsing; string-based date and time display; task counts; and numbered list formatting.
+Verify task parsing, date conversion and display, task counts, and numbered list formatting.
 
 ### Inputs
 
 ```text
 todo read book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2019-10-15
+event project meeting /from 2019-12-02 /to 2019-12-03
 list
 bye
 ```
@@ -258,19 +266,19 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-       [D][ ] return book (by: Sunday)
+       [D][ ] return book (by: Oct 15 2019)
      Now you have 2 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-       [E][ ] project meeting (from: Mon 2pm to: 4pm)
+       [E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
      Now you have 3 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
      Here are the tasks in your list:
      1.[T][ ] read book
-     2.[D][ ] return book (by: Sunday)
-     3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+     2.[D][ ] return book (by: Oct 15 2019)
+     3.[E][ ] project meeting (from: Dec 02 2019 to: Dec 03 2019)
     ____________________________________________________________
     ____________________________________________________________
      Bye. Koara hopes to see you again soon!
@@ -371,8 +379,8 @@ Verify the exact Level 6 deletion confirmation, updated task count, and renumber
 
 ```text
 todo read book
-deadline return book /by June 6th
-event project meeting /from Aug 6th 2pm /to 4pm
+deadline return book /by 2026-06-06
+event project meeting /from 2026-08-06 /to 2026-08-07
 todo join sports club
 todo borrow book
 list
@@ -400,12 +408,12 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-       [D][ ] return book (by: June 6th)
+       [D][ ] return book (by: Jun 06 2026)
      Now you have 2 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-       [E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+       [E][ ] project meeting (from: Aug 06 2026 to: Aug 07 2026)
      Now you have 3 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
@@ -421,20 +429,20 @@ bye
     ____________________________________________________________
      Here are the tasks in your list:
      1.[T][ ] read book
-     2.[D][ ] return book (by: June 6th)
-     3.[E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+     2.[D][ ] return book (by: Jun 06 2026)
+     3.[E][ ] project meeting (from: Aug 06 2026 to: Aug 07 2026)
      4.[T][ ] join sports club
      5.[T][ ] borrow book
     ____________________________________________________________
     ____________________________________________________________
      Noted. I've removed this task:
-       [E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+       [E][ ] project meeting (from: Aug 06 2026 to: Aug 07 2026)
      Now you have 4 tasks in the list.
     ____________________________________________________________
     ____________________________________________________________
      Here are the tasks in your list:
      1.[T][ ] read book
-     2.[D][ ] return book (by: June 6th)
+     2.[D][ ] return book (by: Jun 06 2026)
      3.[T][ ] join sports club
      4.[T][ ] borrow book
     ____________________________________________________________

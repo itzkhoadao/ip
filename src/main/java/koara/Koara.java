@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -14,6 +16,8 @@ public class Koara {
     private static final String LINE_INDENT = "    ";
     private static final String RESPONSE_INDENT = LINE_INDENT + " ";
     private static final String HORIZONTAL_LINE = LINE_INDENT + "_".repeat(60);
+    private static final String DATE_FORMAT_ERROR = "Wrong date format!!! Please use yyyy-MM-dd.";
+    private static final String INVALID_SAVED_DATA_ERROR = "Sorry, the saved task data is invalid.";
     private static final Path DATA_FILE_PATH = Path.of("data", "koara.txt");
 
     /**
@@ -148,37 +152,39 @@ public class Koara {
     private static Task parseStoredTask(String taskLine) throws KoaraException {
         String[] taskParts = taskLine.split(" \\| ", -1);
         if (taskParts.length < 3 || taskParts[2].isEmpty()) {
-            throw new KoaraException("Sorry, the saved task data is invalid.");
+            throw new KoaraException(INVALID_SAVED_DATA_ERROR);
         }
 
         Task task;
         switch (taskParts[0]) {
             case "T":
                 if (taskParts.length != 3) {
-                    throw new KoaraException("Sorry, the saved task data is invalid.");
+                    throw new KoaraException(INVALID_SAVED_DATA_ERROR);
                 }
                 task = new Todo(taskParts[2]);
                 break;
             case "D":
                 if (taskParts.length != 4 || taskParts[3].isEmpty()) {
-                    throw new KoaraException("Sorry, the saved task data is invalid.");
+                    throw new KoaraException(INVALID_SAVED_DATA_ERROR);
                 }
-                task = new Deadline(taskParts[2], taskParts[3]);
+                task = new Deadline(taskParts[2], parseDate(taskParts[3], INVALID_SAVED_DATA_ERROR));
                 break;
             case "E":
                 if (taskParts.length != 5 || taskParts[3].isEmpty() || taskParts[4].isEmpty()) {
-                    throw new KoaraException("Sorry, the saved task data is invalid.");
+                    throw new KoaraException(INVALID_SAVED_DATA_ERROR);
                 }
-                task = new Event(taskParts[2], taskParts[3], taskParts[4]);
+                LocalDate from = parseDate(taskParts[3], INVALID_SAVED_DATA_ERROR);
+                LocalDate to = parseDate(taskParts[4], INVALID_SAVED_DATA_ERROR);
+                task = new Event(taskParts[2], from, to);
                 break;
             default:
-                throw new KoaraException("Sorry, the saved task data is invalid.");
+                throw new KoaraException(INVALID_SAVED_DATA_ERROR);
         }
 
         if (taskParts[1].equals("1")) {
             task.markAsDone();
         } else if (!taskParts[1].equals("0")) {
-            throw new KoaraException("Sorry, the saved task data is invalid.");
+            throw new KoaraException(INVALID_SAVED_DATA_ERROR);
         }
         return task;
     }
@@ -211,14 +217,15 @@ public class Koara {
                 throw new KoaraException("Sorry, this cannot!!! A deadline task needs a /by date or time.");
             }
             String description = taskDetails.substring(0, bySeparatorIndex).trim();
-            String by = taskDetails.substring(bySeparatorIndex + " /by ".length()).trim();
+            String byText = taskDetails.substring(bySeparatorIndex + " /by ".length()).trim();
             if (description.isEmpty()) {
                 throw new KoaraException("Error error!!! The description of a deadline task cannot be empty. "
                         + "Try typing something more.");
             }
-            if (by.isEmpty()) {
+            if (byText.isEmpty()) {
                 throw new KoaraException("Sorry, cannot bro!!! A deadline task needs a /by date or time.");
             }
+            LocalDate by = parseDate(byText, DATE_FORMAT_ERROR);
             return new Deadline(description, by);
         }
 
@@ -242,18 +249,36 @@ public class Koara {
         }
 
         String description = taskDetails.substring(0, fromSeparatorIndex).trim();
-        String from = taskDetails.substring(fromSeparatorIndex + " /from ".length(), toSeparatorIndex).trim();
-        String to = taskDetails.substring(toSeparatorIndex + " /to ".length()).trim();
+        String fromText = taskDetails.substring(fromSeparatorIndex + " /from ".length(), toSeparatorIndex).trim();
+        String toText = taskDetails.substring(toSeparatorIndex + " /to ".length()).trim();
 
         if (description.isEmpty()) {
             throw new KoaraException("Your bad!!! The description of an event task cannot be empty. "
                     + "Try typing something more.");
         }
-        if (from.isEmpty() || to.isEmpty()) {
+        if (fromText.isEmpty() || toText.isEmpty()) {
             throw new KoaraException("Wrong input!!! An event task needs /from and /to dates or times.");
         }
 
+        LocalDate from = parseDate(fromText, DATE_FORMAT_ERROR);
+        LocalDate to = parseDate(toText, DATE_FORMAT_ERROR);
         return new Event(description, from, to);
+    }
+
+    /**
+     * Parses a date in ISO format.
+     *
+     * @param dateText Date in yyyy-MM-dd format.
+     * @param errorMessage Message to use if the date is invalid.
+     * @return Parsed date.
+     * @throws KoaraException If the date is invalid.
+     */
+    private static LocalDate parseDate(String dateText, String errorMessage) throws KoaraException {
+        try {
+            return LocalDate.parse(dateText);
+        } catch (DateTimeParseException exception) {
+            throw new KoaraException(errorMessage);
+        }
     }
 
     /**

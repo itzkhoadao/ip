@@ -2,7 +2,7 @@
 
 ## Test environment
 
-- Entry point: `src/main/java/Koara.java`
+- Entry point: `src/main/java/koara/Koara.java`
 - Runtime and compiler: Java 25
 - Isolation: each test case starts a new Koara process
 - Comparison: exact standard output after normalizing line endings; spaces, blank lines, punctuation, letter case, and the final newline remain significant

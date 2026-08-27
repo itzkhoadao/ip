@@ -135,14 +135,15 @@ def main() -> int:
 
         passed = 0
         for test_case in cases:
-            result = subprocess.run(
-                ["java", "-cp", class_directory, "koara.Koara"],
-                cwd=project_root,
-                input=test_case.inputs,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            with tempfile.TemporaryDirectory(prefix="koara-ui-case-") as case_directory:
+                result = subprocess.run(
+                    ["java", "-cp", class_directory, "koara.Koara"],
+                    cwd=case_directory,
+                    input=test_case.inputs,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
             actual_output = normalize_line_endings(result.stdout)
             expected_output = normalize_line_endings(test_case.expected_output)
 

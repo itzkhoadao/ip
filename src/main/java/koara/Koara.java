@@ -1,6 +1,7 @@
 package koara;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,9 +20,8 @@ public class Koara {
      * Starts an interactive session for managing todos, deadlines, and events.
      *
      * @param args Command-line arguments, which are not used.
-     * @throws IOException If the task list cannot be saved.
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         String banner = """
                  _  __  ___      _      ____       _
                 | |/ / / _ \\    / \\    |  _ \\     / \\
@@ -35,7 +35,14 @@ public class Koara {
         System.out.println(RESPONSE_INDENT + "What can I do for you?");
         System.out.println(HORIZONTAL_LINE);
 
-        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Task> tasks;
+        try {
+            tasks = loadTasks();
+        } catch (KoaraException exception) {
+            tasks = new ArrayList<>();
+            System.out.println(RESPONSE_INDENT + exception.getMessage());
+            System.out.println(HORIZONTAL_LINE);
+        }
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
@@ -93,14 +100,87 @@ public class Koara {
      * Saves the complete task list using Koara's line-based data format.
      *
      * @param tasks Tasks to save.
-     * @throws IOException If the task list cannot be written.
+     * @throws KoaraException If the task list cannot be written.
      */
-    private static void saveTasks(ArrayList<Task> tasks) throws IOException {
+    private static void saveTasks(ArrayList<Task> tasks) throws KoaraException {
         ArrayList<String> taskLines = new ArrayList<>();
         for (Task task : tasks) {
             taskLines.add(task.toDataString());
         }
-        Files.write(DATA_FILE_PATH, taskLines);
+
+        try {
+            Files.createDirectories(DATA_FILE_PATH.getParent());
+            Files.write(DATA_FILE_PATH, taskLines, StandardCharsets.UTF_8);
+        } catch (IOException exception) {
+            throw new KoaraException("Sorry, I couldn't save your tasks.");
+        }
+    }
+
+    /**
+     * Loads tasks from Koara's data file.
+     *
+     * @return Tasks loaded from the data file.
+     * @throws KoaraException If the data file cannot be read or contains invalid data.
+     */
+    private static ArrayList<Task> loadTasks() throws KoaraException {
+        ArrayList<Task> tasks = new ArrayList<>();
+        if (Files.notExists(DATA_FILE_PATH)) {
+            return tasks;
+        }
+
+        try {
+            for (String taskLine : Files.readAllLines(DATA_FILE_PATH, StandardCharsets.UTF_8)) {
+                tasks.add(parseStoredTask(taskLine));
+            }
+        } catch (IOException exception) {
+            throw new KoaraException("Sorry, I couldn't load your saved tasks.");
+        }
+        return tasks;
+    }
+
+    /**
+     * Parses one task stored in Koara's line-based data format.
+     *
+     * @param taskLine Stored task data.
+     * @return Task represented by the stored data.
+     * @throws KoaraException If the stored data is invalid.
+     */
+    private static Task parseStoredTask(String taskLine) throws KoaraException {
+        String[] taskParts = taskLine.split(" \\| ", -1);
+        if (taskParts.length < 3 || taskParts[2].isEmpty()) {
+            throw new KoaraException("Sorry, the saved task data is invalid.");
+        }
+
+        Task task;
+        switch (taskParts[0]) {
+            case "T":
+                if (taskParts.length != 3) {
+                    throw new KoaraException("Sorry, the saved task data is invalid.");
+                }
+                task = new Todo(taskParts[2]);
+                break;
+            case "D":
+                if (taskParts.length != 4 || taskParts[3].isEmpty()) {
+                    throw new KoaraException("Sorry, the saved task data is invalid.");
+                }
+                task = new Deadline(taskParts[2], taskParts[3]);
+                break;
+            case "E":
+                if (taskParts.length != 5 || taskParts[3].isEmpty() || taskParts[4].isEmpty()) {
+                    throw new KoaraException("Sorry, the saved task data is invalid.");
+                }
+                task = new Event(taskParts[2], taskParts[3], taskParts[4]);
+                break;
+            default:
+                throw new KoaraException("Sorry, the saved task data is invalid.");
+        }
+
+        if (taskParts[1].equals("1")) {
+            task.markAsDone();
+        } else if (!taskParts[1].equals("0")) {
+            throw new KoaraException("Sorry, the saved task data is invalid.");
+        }
+        return task;
     }
 
     /**

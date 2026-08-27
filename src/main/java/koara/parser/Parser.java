@@ -1,7 +1,13 @@
-package koara;
+package koara.parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+
+import koara.exception.KoaraException;
+import koara.task.Deadline;
+import koara.task.Event;
+import koara.task.Task;
+import koara.task.Todo;
 
 /**
  * Parses and validates commands entered by the user.

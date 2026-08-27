@@ -1,4 +1,4 @@
-package koara;
+package koara.task;
 
 import java.util.ArrayList;
 

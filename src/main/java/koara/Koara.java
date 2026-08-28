@@ -75,25 +75,25 @@ public class Koara {
         if (command.equals("list")) {
             ui.showTaskList(tasks);
         } else if (Parser.matchesCommand(command, "mark")) {
-            int taskIndex = Parser.parseTaskIndex(command, "mark", tasks.size());
+            int taskIndex = Parser.parseTaskIndex(command, "mark", tasks.getSize());
             tasks.mark(taskIndex);
             storage.save(tasks);
             ui.showTaskMarked(tasks.get(taskIndex));
         } else if (Parser.matchesCommand(command, "unmark")) {
-            int taskIndex = Parser.parseTaskIndex(command, "unmark", tasks.size());
+            int taskIndex = Parser.parseTaskIndex(command, "unmark", tasks.getSize());
             tasks.unmark(taskIndex);
             storage.save(tasks);
             ui.showTaskUnmarked(tasks.get(taskIndex));
         } else if (Parser.matchesCommand(command, "delete")) {
-            int taskIndex = Parser.parseTaskIndex(command, "delete", tasks.size());
+            int taskIndex = Parser.parseTaskIndex(command, "delete", tasks.getSize());
             Task removedTask = tasks.delete(taskIndex);
             storage.save(tasks);
-            ui.showTaskDeleted(removedTask, tasks.size());
+            ui.showTaskDeleted(removedTask, tasks.getSize());
         } else {
             Task task = Parser.parseTask(command);
             tasks.add(task);
             storage.save(tasks);
-            ui.showTaskAdded(task, tasks.size());
+            ui.showTaskAdded(task, tasks.getSize());
         }
     }
 

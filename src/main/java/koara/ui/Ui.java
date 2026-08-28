@@ -9,9 +9,9 @@ import koara.task.TaskList;
  * Handles interactions between Koara and the user.
  */
 public class Ui implements AutoCloseable {
-    private static final String LINE_INDENT = "    ";
-    private static final String RESPONSE_INDENT = LINE_INDENT + " ";
-    private static final String HORIZONTAL_LINE = LINE_INDENT + "_".repeat(60);
+    private static final String DISPLAY_LINE_INDENT = "    ";
+    private static final String DISPLAY_RESPONSE_INDENT = DISPLAY_LINE_INDENT + " ";
+    private static final String DISPLAY_HORIZONTAL_LINE = DISPLAY_LINE_INDENT + "_".repeat(60);
 
     private final Scanner scanner;
 
@@ -34,7 +34,7 @@ public class Ui implements AutoCloseable {
                 |_|\\_\\ \\___/ /_/   \\_\\ |_| \\_\\ /_/   \\_\\
                 """;
         showLine();
-        System.out.print(banner.indent(RESPONSE_INDENT.length()));
+        System.out.print(banner.indent(DISPLAY_RESPONSE_INDENT.length()));
         showMessage("Hello! I'm Koara.");
         showMessage("What can I do for you?");
         showLine();
@@ -62,7 +62,7 @@ public class Ui implements AutoCloseable {
      * Displays the horizontal response divider.
      */
     public void showLine() {
-        System.out.println(HORIZONTAL_LINE);
+        System.out.println(DISPLAY_HORIZONTAL_LINE);
     }
 
     /**
@@ -79,7 +79,7 @@ public class Ui implements AutoCloseable {
      */
     public void showTaskList(TaskList tasks) {
         showMessage("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
+        for (int i = 0; i < tasks.getSize(); i++) {
             showMessage((i + 1) + "." + tasks.get(i));
         }
     }
@@ -138,7 +138,7 @@ public class Ui implements AutoCloseable {
     }
 
     private void showMessage(String message) {
-        System.out.println(RESPONSE_INDENT + message);
+        System.out.println(DISPLAY_RESPONSE_INDENT + message);
     }
 
     /**

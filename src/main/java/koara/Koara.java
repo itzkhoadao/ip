@@ -83,6 +83,9 @@ public class Koara {
             Task removedTask = tasks.delete(taskIndex);
             storage.save(tasks);
             ui.showTaskDeleted(removedTask, tasks.size());
+        } else if (Parser.matchesCommand(command, "find")) {
+            String keyword = Parser.parseFindKeyword(command);
+            ui.showMatchingTasks(tasks.find(keyword));
         } else {
             Task task = Parser.parseTask(command);
             tasks.add(task);

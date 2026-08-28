@@ -59,4 +59,29 @@ public class TaskListTest {
                 "E | 0 | project meeting | 2019-12-02 | 2019-12-03"
         ), tasks.toDataLines());
     }
+
+    @Test
+    public void find_matchingDescriptions_returnsMatchingTasksInOrder() {
+        Todo todo = new Todo("read book");
+        Deadline deadline = new Deadline("return book", LocalDate.of(2019, 10, 15));
+        Event event = new Event("project meeting", LocalDate.of(2019, 12, 2), LocalDate.of(2019, 12, 3));
+        TaskList tasks = new TaskList(new ArrayList<>(List.of(todo, deadline, event)));
+
+        TaskList matchingTasks = tasks.find("book");
+
+        assertEquals(2, matchingTasks.size());
+        assertSame(todo, matchingTasks.get(0));
+        assertSame(deadline, matchingTasks.get(1));
+    }
+
+    @Test
+    public void find_keywordOutsideDescription_returnsEmptyTaskList() {
+        TaskList tasks = new TaskList(new ArrayList<>(List.of(
+                new Deadline("return assignment", LocalDate.of(2019, 10, 15))
+        )));
+
+        TaskList matchingTasks = tasks.find("2019");
+
+        assertEquals(0, matchingTasks.size());
+    }
 }

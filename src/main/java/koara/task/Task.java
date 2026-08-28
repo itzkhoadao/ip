@@ -47,6 +47,16 @@ public class Task {
     }
 
     /**
+     * Returns whether this task's description contains the specified keyword.
+     *
+     * @param keyword Keyword to search for.
+     * @return True if the description contains the keyword.
+     */
+    public boolean containsKeyword(String keyword) {
+        return description.contains(keyword);
+    }
+
+    /**
      * Returns this task in the line-based format used by the data file.
      *
      * @return Serialized task data.

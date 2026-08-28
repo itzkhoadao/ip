@@ -131,6 +131,21 @@ public class Parser {
         return taskNumber - 1;
     }
 
+    /**
+     * Extracts and validates the keyword from a find command.
+     *
+     * @param command Find command entered by the user.
+     * @return Keyword to search for.
+     * @throws KoaraException If the keyword is empty.
+     */
+    public static String parseFindKeyword(String command) throws KoaraException {
+        String keyword = command.substring("find".length()).trim();
+        if (keyword.isEmpty()) {
+            throw new KoaraException("Oops!!! Please specify a keyword to find.");
+        }
+        return keyword;
+    }
+
     private static LocalDate parseDate(String dateText) throws KoaraException {
         try {
             return LocalDate.parse(dateText);

@@ -85,6 +85,18 @@ public class Ui implements AutoCloseable {
     }
 
     /**
+     * Displays tasks that match a find command.
+     *
+     * @param matchingTasks Matching tasks to display.
+     */
+    public void showMatchingTasks(TaskList matchingTasks) {
+        showMessage("Here are the matching tasks in your list:");
+        for (int i = 0; i < matchingTasks.size(); i++) {
+            showMessage((i + 1) + "." + matchingTasks.get(i));
+        }
+    }
+
+    /**
      * Displays confirmation that a task was marked as done.
      *
      * @param task Task that was marked.

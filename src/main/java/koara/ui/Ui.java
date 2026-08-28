@@ -141,6 +141,9 @@ public class Ui implements AutoCloseable {
         System.out.println(RESPONSE_INDENT + message);
     }
 
+    /**
+     * Closes the scanner used to read commands.
+     */
     @Override
     public void close() {
         scanner.close();

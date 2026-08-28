@@ -27,6 +27,11 @@ public class Event extends Task {
         this.to = to;
     }
 
+    /**
+     * Returns this event with its start and end dates in display format.
+     *
+     * @return Display representation of this event.
+     */
     @Override
     public String toString() {
         return super.toString() + " (from: " + from.format(DISPLAY_DATE_FORMAT)

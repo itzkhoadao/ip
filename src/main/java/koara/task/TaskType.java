@@ -10,6 +10,11 @@ public enum TaskType {
 
     private final String icon;
 
+    /**
+     * Creates a task type with its storage and display icon.
+     *
+     * @param icon Icon representing the task type.
+     */
     TaskType(String icon) {
         this.icon = icon;
     }

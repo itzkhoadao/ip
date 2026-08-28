@@ -131,6 +131,13 @@ public class Parser {
         return taskNumber - 1;
     }
 
+    /**
+     * Parses a date in the required ISO local-date format.
+     *
+     * @param dateText Date text to parse.
+     * @return Parsed date.
+     * @throws KoaraException If the text is not a valid date in yyyy-MM-dd format.
+     */
     private static LocalDate parseDate(String dateText) throws KoaraException {
         try {
             return LocalDate.parse(dateText);

@@ -72,6 +72,13 @@ public class Storage {
         }
     }
 
+    /**
+     * Reconstructs a task from one line of saved task data.
+     *
+     * @param taskLine Saved task data to parse.
+     * @return Task represented by the saved data.
+     * @throws KoaraException If the saved data is invalid.
+     */
     private Task parseStoredTask(String taskLine) throws KoaraException {
         String[] taskParts = taskLine.split(" \\| ", -1);
         if (taskParts.length < 3 || taskParts[2].isEmpty()) {
@@ -112,6 +119,13 @@ public class Storage {
         return task;
     }
 
+    /**
+     * Parses a date stored in the data file.
+     *
+     * @param dateText Stored date text to parse.
+     * @return Parsed date.
+     * @throws KoaraException If the stored date is invalid.
+     */
     private LocalDate parseDate(String dateText) throws KoaraException {
         try {
             return LocalDate.parse(dateText);

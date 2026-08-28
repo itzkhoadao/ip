@@ -49,4 +49,15 @@ public class ParserTest {
         assertThrows(KoaraException.class, () -> Parser.parseTaskIndex("mark 0", "mark", 3));
         assertThrows(KoaraException.class, () -> Parser.parseTaskIndex("mark 4", "mark", 3));
     }
+
+    @Test
+    public void parseFindKeyword_validCommand_returnsTrimmedKeyword() throws KoaraException {
+        assertEquals("read book", Parser.parseFindKeyword("find   read book  "));
+    }
+
+    @Test
+    public void parseFindKeyword_emptyKeyword_throwsKoaraException() {
+        assertThrows(KoaraException.class, () -> Parser.parseFindKeyword("find"));
+        assertThrows(KoaraException.class, () -> Parser.parseFindKeyword("find   "));
+    }
 }

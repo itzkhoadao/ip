@@ -55,6 +55,11 @@ public class Task {
         return taskType.getIcon() + " | " + (isDone ? "1" : "0") + " | " + description;
     }
 
+    /**
+     * Returns this task in its user-facing display format.
+     *
+     * @return Display representation of this task.
+     */
     @Override
     public String toString() {
         return "[" + taskType.getIcon() + "][" + getStatusIcon() + "] " + description + additionalInformation;

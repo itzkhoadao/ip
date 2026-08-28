@@ -24,6 +24,11 @@ public class Deadline extends Task {
         this.by = by;
     }
 
+    /**
+     * Returns this deadline with its due date in display format.
+     *
+     * @return Display representation of this deadline.
+     */
     @Override
     public String toString() {
         return super.toString() + " (by: " + by.format(DISPLAY_DATE_FORMAT) + ")";

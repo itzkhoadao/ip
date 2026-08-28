@@ -65,6 +65,12 @@ public class Koara {
         }
     }
 
+    /**
+     * Executes a non-exit command and persists any resulting task-list changes.
+     *
+     * @param command Command entered by the user.
+     * @throws KoaraException If the command is invalid or a task-list change cannot be saved.
+     */
     private void executeCommand(String command) throws KoaraException {
         if (command.equals("list")) {
             ui.showTaskList(tasks);

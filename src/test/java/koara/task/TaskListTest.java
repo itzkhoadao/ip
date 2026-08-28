@@ -19,7 +19,7 @@ public class TaskListTest {
 
         tasks.add(todo);
         tasks.add(deadline);
-        assertEquals(2, tasks.size());
+        assertEquals(2, tasks.getSize());
         assertSame(deadline, tasks.get(1));
 
         tasks.mark(1);
@@ -28,29 +28,29 @@ public class TaskListTest {
         assertEquals("[D][ ] return book (by: Oct 15 2019)", tasks.get(1).toString());
 
         assertSame(todo, tasks.delete(0));
-        assertEquals(1, tasks.size());
+        assertEquals(1, tasks.getSize());
         assertSame(deadline, tasks.get(0));
     }
 
     @Test
     public void constructor_sourceListChanged_doesNotChangeTaskList() {
-        ArrayList<Task> source = new ArrayList<>();
-        source.add(new Todo("read book"));
+        ArrayList<Task> sourceTasks = new ArrayList<>();
+        sourceTasks.add(new Todo("read book"));
 
-        TaskList tasks = new TaskList(source);
-        source.clear();
+        TaskList tasks = new TaskList(sourceTasks);
+        sourceTasks.clear();
 
-        assertEquals(1, tasks.size());
+        assertEquals(1, tasks.getSize());
         assertEquals("[T][ ] read book", tasks.get(0).toString());
     }
 
     @Test
     public void toDataLines_mixedTasks_returnsStorageFormat() {
-        ArrayList<Task> source = new ArrayList<>();
-        source.add(new Todo("read book"));
-        source.add(new Deadline("return book", LocalDate.of(2019, 10, 15)));
-        source.add(new Event("project meeting", LocalDate.of(2019, 12, 2), LocalDate.of(2019, 12, 3)));
-        TaskList tasks = new TaskList(source);
+        ArrayList<Task> sourceTasks = new ArrayList<>();
+        sourceTasks.add(new Todo("read book"));
+        sourceTasks.add(new Deadline("return book", LocalDate.of(2019, 10, 15)));
+        sourceTasks.add(new Event("project meeting", LocalDate.of(2019, 12, 2), LocalDate.of(2019, 12, 3)));
+        TaskList tasks = new TaskList(sourceTasks);
         tasks.mark(1);
 
         assertEquals(List.of(

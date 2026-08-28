@@ -96,9 +96,9 @@ public class Storage {
                 if (taskParts.length != 5 || taskParts[3].isEmpty() || taskParts[4].isEmpty()) {
                     throw new KoaraException(INVALID_SAVED_DATA_ERROR);
                 }
-                LocalDate from = parseDate(taskParts[3]);
-                LocalDate to = parseDate(taskParts[4]);
-                task = new Event(taskParts[2], from, to);
+                LocalDate startDate = parseDate(taskParts[3]);
+                LocalDate endDate = parseDate(taskParts[4]);
+                task = new Event(taskParts[2], startDate, endDate);
                 break;
             default:
                 throw new KoaraException(INVALID_SAVED_DATA_ERROR);

@@ -32,8 +32,7 @@ public class Ui implements AutoCloseable {
                 """;
         showLine();
         System.out.print(banner.indent(DISPLAY_RESPONSE_INDENT.length()));
-        showMessage("Hello! I'm Koara.");
-        showMessage("What can I do for you?");
+        showResponse("Hello! I'm Koara.", "What can I do for you?");
         showLine();
     }
 
@@ -63,12 +62,14 @@ public class Ui implements AutoCloseable {
     }
 
     /**
-     * Displays every line of a response using the standard indentation.
+     * Displays every line of the responses using the standard indentation.
      *
-     * @param response Response to display.
+     * @param responses Responses to display.
      */
-    public void showResponse(String response) {
-        response.lines().forEach(this::showMessage);
+    public void showResponse(String... responses) {
+        for (String response : responses) {
+            response.lines().forEach(this::showMessage);
+        }
     }
 
     private void showMessage(String message) {

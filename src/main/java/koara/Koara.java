@@ -1,6 +1,7 @@
 package koara;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 import koara.exception.KoaraException;
 import koara.parser.Parser;
@@ -16,8 +17,15 @@ public class Koara {
     private static final Path DATA_FILE_PATH = Path.of("data", "koara.txt");
 
     private final Storage storage;
-    private final Ui ui;
-    private TaskList tasks;
+    private final TaskList tasks;
+    private final String startupError;
+
+    /**
+     * Creates Koara using its default data file.
+     */
+    public Koara() {
+        this(DATA_FILE_PATH);
+    }
 
     /**
      * Creates Koara using the specified data file.
@@ -26,78 +34,123 @@ public class Koara {
      */
     public Koara(Path dataFilePath) {
         storage = new Storage(dataFilePath);
-        ui = new Ui();
-        tasks = new TaskList();
+        TaskList loadedTasks;
+        String loadError = null;
+        try {
+            loadedTasks = storage.load();
+        } catch (KoaraException exception) {
+            loadedTasks = new TaskList();
+            loadError = exception.getMessage();
+        }
+        tasks = loadedTasks;
+        startupError = loadError;
     }
 
     /**
      * Starts an interactive session for managing tasks.
      */
     public void run() {
-        ui.showWelcome();
-        try {
-            tasks = storage.load();
-        } catch (KoaraException exception) {
-            ui.showError(exception.getMessage());
-            ui.showLine();
-        }
-
-        try {
+        try (Ui ui = new Ui()) {
+            ui.showWelcome();
+            if (startupError != null) {
+                ui.showResponse(startupError);
+                ui.showLine();
+            }
             while (ui.hasNextCommand()) {
                 String command = ui.readCommand();
                 ui.showLine();
-
+                ui.showResponse(getResponse(command));
+                ui.showLine();
                 if (command.equals("bye")) {
-                    ui.showGoodbye();
-                    ui.showLine();
                     break;
                 }
-
-                try {
-                    executeCommand(command);
-                } catch (KoaraException exception) {
-                    ui.showError(exception.getMessage());
-                }
-                ui.showLine();
             }
-        } finally {
-            ui.close();
         }
     }
 
     /**
-     * Executes a non-exit command and persists any resulting task-list changes.
+     * Returns an initialization error that should be shown to the user, if any.
+     *
+     * @return Initialization error, or an empty value when loading succeeded.
+     */
+    public Optional<String> getStartupError() {
+        return Optional.ofNullable(startupError);
+    }
+
+    /**
+     * Executes a command and returns Koara's response.
      *
      * @param command Command entered by the user.
-     * @throws KoaraException If the command is invalid or a task-list change cannot be saved.
+     * @return User-facing response to the command.
      */
-    private void executeCommand(String command) throws KoaraException {
+    public String getResponse(String command) {
+        if (command.equals("bye")) {
+            return "Bye. Koara hopes to see you again soon!";
+        }
+
+        try {
+            return executeCommand(command);
+        } catch (KoaraException exception) {
+            return exception.getMessage();
+        }
+    }
+
+    /**
+     * Executes a non-exit command and persists any task-list changes.
+     *
+     * @param command Command entered by the user.
+     * @return User-facing response to the command.
+     * @throws KoaraException If the command is invalid or a change cannot be saved.
+     */
+    private String executeCommand(String command) throws KoaraException {
         if (command.equals("list")) {
-            ui.showTaskList(tasks);
-        } else if (Parser.matchesCommand(command, "mark")) {
+            return formatTaskList("Here are the tasks in your list:", tasks);
+        }
+        if (Parser.matchesCommand(command, "mark")) {
             int taskIndex = Parser.parseTaskIndex(command, "mark", tasks.getSize());
             tasks.mark(taskIndex);
             storage.save(tasks);
-            ui.showTaskMarked(tasks.get(taskIndex));
-        } else if (Parser.matchesCommand(command, "unmark")) {
+            return "Nice! I've marked this task as done:\n  " + tasks.get(taskIndex);
+        }
+        if (Parser.matchesCommand(command, "unmark")) {
             int taskIndex = Parser.parseTaskIndex(command, "unmark", tasks.getSize());
             tasks.unmark(taskIndex);
             storage.save(tasks);
-            ui.showTaskUnmarked(tasks.get(taskIndex));
-        } else if (Parser.matchesCommand(command, "delete")) {
+            return "OK, I've marked this task as not done yet:\n  " + tasks.get(taskIndex);
+        }
+        if (Parser.matchesCommand(command, "delete")) {
             int taskIndex = Parser.parseTaskIndex(command, "delete", tasks.getSize());
             Task removedTask = tasks.delete(taskIndex);
             storage.save(tasks);
-            ui.showTaskDeleted(removedTask, tasks.getSize());
-        } else if (Parser.matchesCommand(command, "find")) {
-            String keyword = Parser.parseFindKeyword(command);
-            ui.showMatchingTasks(tasks.find(keyword));
-        } else {
-            Task task = Parser.parseTask(command);
-            tasks.add(task);
-            storage.save(tasks);
-            ui.showTaskAdded(task, tasks.getSize());
+            return "Noted. I've removed this task:\n  " + removedTask
+                    + "\nNow you have " + tasks.getSize() + " tasks in the list.";
         }
+        if (Parser.matchesCommand(command, "find")) {
+            String keyword = Parser.parseFindKeyword(command);
+            return formatTaskList("Here are the matching tasks in your list:",
+                    tasks.find(keyword));
+        }
+
+        Task task = Parser.parseTask(command);
+        tasks.add(task);
+        storage.save(tasks);
+        return "Got it. I've added this task:\n  " + task
+                + "\nNow you have " + tasks.getSize() + " tasks in the list.";
+    }
+
+    /**
+     * Formats a heading followed by a numbered list of tasks.
+     *
+     * @param heading Heading placed before the tasks.
+     * @param taskList Tasks to format.
+     * @return Formatted task-list response.
+     */
+    private static String formatTaskList(String heading, TaskList taskList) {
+        StringBuilder response = new StringBuilder(heading);
+        for (int i = 0; i < taskList.getSize(); i++) {
+            response.append("\n").append(i + 1).append(".").append(taskList.get(i));
+        }
+        return response.toString();
     }
 
     /**

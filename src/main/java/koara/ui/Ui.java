@@ -2,9 +2,6 @@ package koara.ui;
 
 import java.util.Scanner;
 
-import koara.task.Task;
-import koara.task.TaskList;
-
 /**
  * Handles interactions between Koara and the user.
  */
@@ -66,87 +63,12 @@ public class Ui implements AutoCloseable {
     }
 
     /**
-     * Displays Koara's farewell.
-     */
-    public void showGoodbye() {
-        showMessage("Bye. Koara hopes to see you again soon!");
-    }
-
-    /**
-     * Displays all tasks in their current order.
+     * Displays every line of a response using the standard indentation.
      *
-     * @param tasks Tasks to display.
+     * @param response Response to display.
      */
-    public void showTaskList(TaskList tasks) {
-        showMessage("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.getSize(); i++) {
-            showMessage((i + 1) + "." + tasks.get(i));
-        }
-    }
-
-    /**
-     * Displays tasks that match a find command.
-     *
-     * @param matchingTasks Matching tasks to display.
-     */
-    public void showMatchingTasks(TaskList matchingTasks) {
-        showMessage("Here are the matching tasks in your list:");
-        for (int i = 0; i < matchingTasks.getSize(); i++) {
-            showMessage((i + 1) + "." + matchingTasks.get(i));
-        }
-    }
-
-    /**
-     * Displays confirmation that a task was marked as done.
-     *
-     * @param task Task that was marked.
-     */
-    public void showTaskMarked(Task task) {
-        showMessage("Nice! I've marked this task as done:");
-        showMessage("  " + task);
-    }
-
-    /**
-     * Displays confirmation that a task was marked as not done.
-     *
-     * @param task Task that was unmarked.
-     */
-    public void showTaskUnmarked(Task task) {
-        showMessage("OK, I've marked this task as not done yet:");
-        showMessage("  " + task);
-    }
-
-    /**
-     * Displays confirmation that a task was deleted.
-     *
-     * @param task Task that was deleted.
-     * @param taskCount Number of tasks remaining.
-     */
-    public void showTaskDeleted(Task task, int taskCount) {
-        showMessage("Noted. I've removed this task:");
-        showMessage("  " + task);
-        showMessage("Now you have " + taskCount + " tasks in the list.");
-    }
-
-    /**
-     * Displays confirmation that a task was added.
-     *
-     * @param task Task that was added.
-     * @param taskCount Number of tasks in the list.
-     */
-    public void showTaskAdded(Task task, int taskCount) {
-        showMessage("Got it. I've added this task:");
-        showMessage("  " + task);
-        showMessage("Now you have " + taskCount + " tasks in the list.");
-    }
-
-    /**
-     * Displays an error message.
-     *
-     * @param message Error message to display.
-     */
-    public void showError(String message) {
-        showMessage(message);
+    public void showResponse(String response) {
+        response.lines().forEach(this::showMessage);
     }
 
     private void showMessage(String message) {

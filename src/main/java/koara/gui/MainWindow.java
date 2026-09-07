@@ -44,6 +44,10 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     public void initialize() {
+        assert scrollPane != null : "FXML loader must inject the scroll pane";
+        assert dialogContainer != null : "FXML loader must inject the dialog container";
+        assert userInput != null : "FXML loader must inject the user input field";
+        assert sendButton != null : "FXML loader must inject the send button";
         dialogContainer.heightProperty().addListener(
                 observable -> scrollPane.setVvalue(1.0));
     }
@@ -64,6 +68,7 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     private void handleUserInput() {
+        assert koara != null : "Koara must be set before processing input";
         String input = userInput.getText();
         String response = koara.getResponse(input);
         dialogContainer.getChildren().addAll(

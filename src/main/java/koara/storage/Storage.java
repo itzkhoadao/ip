@@ -29,6 +29,7 @@ public class Storage {
      * @param dataFilePath Path of the data file.
      */
     public Storage(Path dataFilePath) {
+        assert dataFilePath != null : "Data file path must not be null";
         this.dataFilePath = dataFilePath;
     }
 
@@ -61,6 +62,7 @@ public class Storage {
      * @throws KoaraException If the task list cannot be written.
      */
     public void save(TaskList tasks) throws KoaraException {
+        assert tasks != null : "Task list must not be null";
         try {
             Path dataDirectory = dataFilePath.getParent();
             if (dataDirectory != null) {
@@ -80,6 +82,7 @@ public class Storage {
      * @throws KoaraException If the saved data is invalid.
      */
     private Task parseStoredTask(String taskLine) throws KoaraException {
+        assert taskLine != null : "Stored task line must not be null";
         String[] taskParts = taskLine.split(" \\| ", -1);
         if (taskParts.length < 3 || taskParts[2].isEmpty()) {
             throw new KoaraException(INVALID_SAVED_DATA_ERROR);
@@ -127,6 +130,7 @@ public class Storage {
      * @throws KoaraException If the stored date is invalid.
      */
     private LocalDate parseDate(String dateText) throws KoaraException {
+        assert dateText != null && !dateText.isBlank() : "Stored date text must not be blank";
         try {
             return LocalDate.parse(dateText);
         } catch (DateTimeParseException exception) {

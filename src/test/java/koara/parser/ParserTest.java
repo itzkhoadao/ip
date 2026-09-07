@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import koara.client.Client;
 import koara.exception.KoaraException;
+import koara.parser.Parser.ClientEdit;
 import koara.task.Deadline;
 import koara.task.Event;
 import koara.task.Task;
@@ -59,5 +61,30 @@ public class ParserTest {
     public void parseFindKeyword_emptyKeyword_throwsKoaraException() {
         assertThrows(KoaraException.class, () -> Parser.parseFindKeyword("find"));
         assertThrows(KoaraException.class, () -> Parser.parseFindKeyword("find   "));
+    }
+
+    @Test
+    public void parseClient_validCommands_returnsClientDetailsAndEditIndex() throws KoaraException {
+        Client client = Parser.parseClient(
+                "client add Alex Tan /phone 91234567 /goal Run 5 km /notes Knee injury");
+        ClientEdit edit = Parser.parseClientEdit(
+                "client edit 2 /name Alex Tan /phone 91230000 /goal Run 10 km /notes Recovered", 2);
+
+        assertEquals("Alex Tan | Phone: 91234567 | Goal: Run 5 km | Notes: Knee injury", client.toString());
+        assertEquals(1, edit.clientIndex());
+        assertEquals("Alex Tan | Phone: 91230000 | Goal: Run 10 km | Notes: Recovered",
+                edit.client().toString());
+        assertEquals("knee", Parser.parseClientKeyword("client find knee"));
+    }
+
+    @Test
+    public void parseClient_invalidCommands_throwsKoaraException() {
+        assertThrows(KoaraException.class, () -> Parser.parseClient("client add Alex Tan"));
+        assertThrows(KoaraException.class, () -> Parser.parseClient(
+                "client add Alex /phone 91234567 /goal Run /notes   "));
+        assertThrows(KoaraException.class, () -> Parser.parseClientEdit(
+                "client edit 3 /name Alex /phone 91234567 /goal Run /notes Healthy", 2));
+        assertThrows(KoaraException.class, () -> Parser.parseClientKeyword("client find"));
+        assertThrows(KoaraException.class, () -> Parser.parseClientIndex("client delete first", "client delete", 1));
     }
 }

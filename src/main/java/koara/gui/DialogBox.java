@@ -19,7 +19,7 @@ import javafx.scene.layout.HBox;
  */
 public class DialogBox extends HBox {
     @FXML
-    private Label dialog;
+    private Label dialogText;
 
     @FXML
     private ImageView displayPicture;
@@ -41,7 +41,7 @@ public class DialogBox extends HBox {
             throw new RuntimeException("Unable to load a dialog box.", exception);
         }
 
-        dialog.setText(text);
+        dialogText.setText(text);
         displayPicture.setImage(image);
     }
 
@@ -65,14 +65,14 @@ public class DialogBox extends HBox {
      */
     public static DialogBox getKoaraDialog(String text, Image image) {
         DialogBox dialogBox = new DialogBox(text, image);
-        dialogBox.flip();
+        dialogBox.placeImageOnLeft();
         return dialogBox;
     }
 
     /**
      * Places the speaker image on the left of the message.
      */
-    private void flip() {
+    private void placeImageOnLeft() {
         ObservableList<Node> children =
                 FXCollections.observableArrayList(getChildren());
         Collections.reverse(children);

@@ -18,6 +18,7 @@ import koara.Koara;
  * Controls the main chatbot window defined in {@code MainWindow.fxml}.
  */
 public class MainWindow extends AnchorPane {
+    private static final double SCROLL_BOTTOM_POSITION = 1.0;
     private static final Duration EXIT_DELAY = Duration.seconds(1);
     private static final String WELCOME_MESSAGE =
             "Hello! I'm Koara.\nWhat can I do for you?";
@@ -45,7 +46,7 @@ public class MainWindow extends AnchorPane {
     @FXML
     public void initialize() {
         dialogContainer.heightProperty().addListener(
-                observable -> scrollPane.setVvalue(1.0));
+                observable -> scrollPane.setVvalue(SCROLL_BOTTOM_POSITION));
     }
 
     /**

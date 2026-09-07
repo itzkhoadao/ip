@@ -13,6 +13,13 @@ import koara.task.Todo;
  * Parses and validates commands entered by the user.
  */
 public class Parser {
+    private static final String TODO_COMMAND = "todo";
+    private static final String DEADLINE_COMMAND = "deadline";
+    private static final String EVENT_COMMAND = "event";
+    private static final String FIND_COMMAND = "find";
+    private static final String BY_SEPARATOR = " /by ";
+    private static final String FROM_SEPARATOR = " /from ";
+    private static final String TO_SEPARATOR = " /to ";
     private static final String DATE_FORMAT_ERROR = "Wrong date format!!! Please use yyyy-MM-dd.";
 
     private Parser() {
@@ -37,69 +44,84 @@ public class Parser {
      * @throws KoaraException If the command is invalid.
      */
     public static Task parseTask(String command) throws KoaraException {
-        if (matchesCommand(command, "todo")) {
-            String description = command.substring("todo".length()).trim();
-            if (description.isEmpty()) {
-                throw new KoaraException("Unlucky!!! The description of a todo task cannot be empty. "
-                        + "Try typing something more.");
-            }
-            return new Todo(description);
+        if (matchesCommand(command, TODO_COMMAND)) {
+            return parseTodo(command);
         }
-
-        if (matchesCommand(command, "deadline")) {
-            String taskDetails = command.substring("deadline".length()).trim();
-            if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
-                throw new KoaraException("Error error!!! The description of a deadline task cannot be empty. "
-                        + "Try typing something more.");
-            }
-            int bySeparatorIndex = taskDetails.indexOf(" /by ");
-            if (bySeparatorIndex < 0) {
-                throw new KoaraException("Sorry, this cannot!!! A deadline task needs a /by date or time.");
-            }
-            String description = taskDetails.substring(0, bySeparatorIndex).trim();
-            String byText = taskDetails.substring(bySeparatorIndex + " /by ".length()).trim();
-            if (description.isEmpty()) {
-                throw new KoaraException("Error error!!! The description of a deadline task cannot be empty. "
-                        + "Try typing something more.");
-            }
-            if (byText.isEmpty()) {
-                throw new KoaraException("Sorry, cannot bro!!! A deadline task needs a /by date or time.");
-            }
-            return new Deadline(description, parseDate(byText));
+        if (matchesCommand(command, DEADLINE_COMMAND)) {
+            return parseDeadline(command);
         }
-
-        if (!matchesCommand(command, "event")) {
-            throw new KoaraException("What is that bro!!! Sorry ah, I don't know what that means :-(");
+        if (matchesCommand(command, EVENT_COMMAND)) {
+            return parseEvent(command);
         }
+        throw new KoaraException("What is that bro!!! Sorry ah, I don't know what that means :-(");
+    }
 
-        String taskDetails = command.substring("event".length()).trim();
-        if (taskDetails.isEmpty() || taskDetails.startsWith("/from") || taskDetails.startsWith("/to")) {
-            throw new KoaraException("Your bad!!! The description of an event task cannot be empty. "
+    private static Todo parseTodo(String command) throws KoaraException {
+        String description = extractTaskDetails(command, TODO_COMMAND);
+        if (description.isEmpty()) {
+            throw new KoaraException("Unlucky!!! The description of a todo task cannot be empty. "
                     + "Try typing something more.");
         }
-        int fromSeparatorIndex = taskDetails.indexOf(" /from ");
+        return new Todo(description);
+    }
+
+    private static Deadline parseDeadline(String command) throws KoaraException {
+        String taskDetails = extractTaskDetails(command, DEADLINE_COMMAND);
+        if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
+            throw new KoaraException("Error error!!! The description of a deadline task cannot be empty. "
+                    + "Try typing something more.");
+        }
+
+        int bySeparatorIndex = taskDetails.indexOf(BY_SEPARATOR);
+        if (bySeparatorIndex < 0) {
+            throw new KoaraException("Sorry, this cannot!!! A deadline task needs a /by date or time.");
+        }
+
+        String description = taskDetails.substring(0, bySeparatorIndex).trim();
+        String dueDateText = taskDetails.substring(bySeparatorIndex + BY_SEPARATOR.length()).trim();
+        if (dueDateText.isEmpty()) {
+            throw new KoaraException("Sorry, cannot bro!!! A deadline task needs a /by date or time.");
+        }
+        return new Deadline(description, parseDate(dueDateText));
+    }
+
+    private static Event parseEvent(String command) throws KoaraException {
+        String taskDetails = extractTaskDetails(command, EVENT_COMMAND);
+        validateEventDescription(taskDetails);
+
+        int fromSeparatorIndex = taskDetails.indexOf(FROM_SEPARATOR);
         if (fromSeparatorIndex < 0) {
             throw new KoaraException("This cannot ah!!! An event task needs /from and /to dates or times.");
         }
-        int toSeparatorIndex = taskDetails.indexOf(" /to ",
-                fromSeparatorIndex + " /from ".length());
+
+        int toSeparatorIndex = taskDetails.indexOf(TO_SEPARATOR,
+                fromSeparatorIndex + FROM_SEPARATOR.length());
         if (toSeparatorIndex < 0) {
             throw new KoaraException("Retry retry!!! An event task needs /from and /to dates or times.");
         }
 
         String description = taskDetails.substring(0, fromSeparatorIndex).trim();
-        String fromText = taskDetails.substring(fromSeparatorIndex + " /from ".length(), toSeparatorIndex).trim();
-        String toText = taskDetails.substring(toSeparatorIndex + " /to ".length()).trim();
+        String startDateText = taskDetails.substring(
+                fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex).trim();
+        String endDateText = taskDetails.substring(toSeparatorIndex + TO_SEPARATOR.length()).trim();
+        if (startDateText.isEmpty() || endDateText.isEmpty()) {
+            throw new KoaraException("Wrong input!!! An event task needs /from and /to dates or times.");
+        }
+        return new Event(description, parseDate(startDateText), parseDate(endDateText));
+    }
 
-        if (description.isEmpty()) {
+    private static void validateEventDescription(String taskDetails) throws KoaraException {
+        boolean hasNoDescription = taskDetails.isEmpty()
+                || taskDetails.startsWith("/from")
+                || taskDetails.startsWith("/to");
+        if (hasNoDescription) {
             throw new KoaraException("Your bad!!! The description of an event task cannot be empty. "
                     + "Try typing something more.");
         }
-        if (fromText.isEmpty() || toText.isEmpty()) {
-            throw new KoaraException("Wrong input!!! An event task needs /from and /to dates or times.");
-        }
+    }
 
-        return new Event(description, parseDate(fromText), parseDate(toText));
+    private static String extractTaskDetails(String command, String commandWord) {
+        return command.substring(commandWord.length()).trim();
     }
 
     /**
@@ -139,7 +161,7 @@ public class Parser {
      * @throws KoaraException If the keyword is empty.
      */
     public static String parseFindKeyword(String command) throws KoaraException {
-        String keyword = command.substring("find".length()).trim();
+        String keyword = command.substring(FIND_COMMAND.length()).trim();
         if (keyword.isEmpty()) {
             throw new KoaraException("Oops!!! Please specify a keyword to find.");
         }

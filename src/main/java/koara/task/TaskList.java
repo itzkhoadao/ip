@@ -21,6 +21,8 @@ public class TaskList {
      * @param tasks Initial tasks.
      */
     public TaskList(ArrayList<Task> tasks) {
+        assert tasks != null : "Initial task list must not be null";
+        assert !tasks.contains(null) : "Initial task list must not contain null";
         this.tasks = new ArrayList<>(tasks);
     }
 
@@ -40,6 +42,7 @@ public class TaskList {
      * @return Task at the index.
      */
     public Task get(int index) {
+        assert index >= 0 && index < tasks.size() : "Task index must be within the list";
         return tasks.get(index);
     }
 
@@ -49,6 +52,7 @@ public class TaskList {
      * @param task Task to add.
      */
     public void add(Task task) {
+        assert task != null : "Task to add must not be null";
         tasks.add(task);
     }
 
@@ -59,6 +63,7 @@ public class TaskList {
      * @return Removed task.
      */
     public Task delete(int index) {
+        assert index >= 0 && index < tasks.size() : "Task index must be within the list";
         return tasks.remove(index);
     }
 
@@ -68,6 +73,7 @@ public class TaskList {
      * @param index Zero-based task index.
      */
     public void mark(int index) {
+        assert index >= 0 && index < tasks.size() : "Task index must be within the list";
         tasks.get(index).markAsDone();
     }
 
@@ -77,6 +83,7 @@ public class TaskList {
      * @param index Zero-based task index.
      */
     public void unmark(int index) {
+        assert index >= 0 && index < tasks.size() : "Task index must be within the list";
         tasks.get(index).markAsNotDone();
     }
 
@@ -87,6 +94,7 @@ public class TaskList {
      * @return Matching tasks in their original order.
      */
     public TaskList find(String keyword) {
+        assert keyword != null && !keyword.isBlank() : "Search keyword must not be blank";
         ArrayList<Task> matchingTasks = new ArrayList<>();
         for (Task task : tasks) {
             if (task.containsKeyword(keyword)) {

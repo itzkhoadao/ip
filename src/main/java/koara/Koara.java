@@ -5,8 +5,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import koara.client.Client;
+import koara.client.ClientList;
 import koara.exception.KoaraException;
 import koara.parser.Parser;
+import koara.parser.Parser.ClientEdit;
+import koara.storage.ClientStorage;
 import koara.storage.Storage;
 import koara.task.Task;
 import koara.task.TaskList;
@@ -22,10 +26,18 @@ public class Koara {
     private static final String UNMARK_COMMAND = "unmark";
     private static final String DELETE_COMMAND = "delete";
     private static final String FIND_COMMAND = "find";
+    private static final String CLIENT_LIST_COMMAND = "client list";
+    private static final String CLIENT_ADD_COMMAND = "client add";
+    private static final String CLIENT_EDIT_COMMAND = "client edit";
+    private static final String CLIENT_FIND_COMMAND = "client find";
+    private static final String CLIENT_DELETE_COMMAND = "client delete";
     private static final Path DATA_FILE_PATH = Path.of("data", "koara.txt");
+    private static final String CLIENT_DATA_FILE_NAME = "clients.txt";
 
     private final Storage storage;
+    private final ClientStorage clientStorage;
     private final TaskList tasks;
+    private final ClientList clients;
     private final String startupError;
 
     /**
@@ -43,7 +55,9 @@ public class Koara {
     public Koara(Path dataFilePath) {
         assert dataFilePath != null : "Data file path must not be null";
         storage = new Storage(dataFilePath);
+        clientStorage = new ClientStorage(dataFilePath.resolveSibling(CLIENT_DATA_FILE_NAME));
         TaskList loadedTasks;
+        ClientList loadedClients;
         String loadError = null;
         try {
             loadedTasks = storage.load();
@@ -51,7 +65,14 @@ public class Koara {
             loadedTasks = new TaskList();
             loadError = exception.getMessage();
         }
+        try {
+            loadedClients = clientStorage.load();
+        } catch (KoaraException exception) {
+            loadedClients = new ClientList();
+            loadError = combineErrors(loadError, exception.getMessage());
+        }
         tasks = loadedTasks;
+        clients = loadedClients;
         startupError = loadError;
     }
 
@@ -118,6 +139,21 @@ public class Koara {
         if (command.equals(LIST_COMMAND)) {
             return formatTaskList("Here are the tasks in your list:", tasks);
         }
+        if (command.equals(CLIENT_LIST_COMMAND)) {
+            return formatClientList("Here are your clients:", clients);
+        }
+        if (Parser.matchesCommand(command, CLIENT_ADD_COMMAND)) {
+            return addClient(command);
+        }
+        if (Parser.matchesCommand(command, CLIENT_EDIT_COMMAND)) {
+            return editClient(command);
+        }
+        if (Parser.matchesCommand(command, CLIENT_FIND_COMMAND)) {
+            return findClients(command);
+        }
+        if (Parser.matchesCommand(command, CLIENT_DELETE_COMMAND)) {
+            return deleteClient(command);
+        }
         if (Parser.matchesCommand(command, MARK_COMMAND)) {
             return markTask(command);
         }
@@ -169,6 +205,35 @@ public class Koara {
                 + "\nNow you have " + tasks.getSize() + " tasks in the list.";
     }
 
+    private String addClient(String command) throws KoaraException {
+        Client client = Parser.parseClient(command);
+        clients.add(client);
+        clientStorage.save(clients);
+        return "Added this client:\n  " + client
+                + "\nNow you have " + formatClientCount(clients.getSize()) + ".";
+    }
+
+    private String editClient(String command) throws KoaraException {
+        ClientEdit clientEdit = Parser.parseClientEdit(command, clients.getSize());
+        clients.update(clientEdit.clientIndex(), clientEdit.client());
+        clientStorage.save(clients);
+        return "Updated this client:\n  " + clientEdit.client();
+    }
+
+    private String findClients(String command) throws KoaraException {
+        String keyword = Parser.parseClientKeyword(command);
+        ClientList matchingClients = clients.find(keyword);
+        return formatClientList("Here are the matching clients:", matchingClients);
+    }
+
+    private String deleteClient(String command) throws KoaraException {
+        int clientIndex = Parser.parseClientIndex(command, CLIENT_DELETE_COMMAND, clients.getSize());
+        Client removedClient = clients.delete(clientIndex);
+        clientStorage.save(clients);
+        return "Removed this client:\n  " + removedClient
+                + "\nNow you have " + formatClientCount(clients.getSize()) + ".";
+    }
+
     /**
      * Formats a heading followed by a numbered list of tasks.
      *
@@ -183,6 +248,23 @@ public class Koara {
                 .mapToObj(index -> "\n" + (index + 1) + "." + taskList.get(index))
                 .collect(Collectors.joining());
         return heading + formattedTasks;
+    }
+
+    private static String formatClientList(String heading, ClientList clientList) {
+        assert heading != null : "Client list heading must not be null";
+        assert clientList != null : "Client list must not be null";
+        String formattedClients = IntStream.range(0, clientList.getSize())
+                .mapToObj(index -> "\n" + (index + 1) + ". " + clientList.get(index))
+                .collect(Collectors.joining());
+        return heading + formattedClients;
+    }
+
+    private static String combineErrors(String firstError, String secondError) {
+        return firstError == null ? secondError : firstError + "\n" + secondError;
+    }
+
+    private static String formatClientCount(int clientCount) {
+        return clientCount + (clientCount == 1 ? " client" : " clients");
     }
 
     /**

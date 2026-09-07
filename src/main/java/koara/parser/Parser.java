@@ -3,6 +3,7 @@ package koara.parser;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+import koara.client.Client;
 import koara.exception.KoaraException;
 import koara.task.Deadline;
 import koara.task.Event;
@@ -17,6 +18,14 @@ public class Parser {
     private static final String DEADLINE_COMMAND = "deadline";
     private static final String EVENT_COMMAND = "event";
     private static final String FIND_COMMAND = "find";
+    private static final String CLIENT_ADD_COMMAND = "client add";
+    private static final String CLIENT_EDIT_COMMAND = "client edit";
+    private static final String CLIENT_FIND_COMMAND = "client find";
+    private static final String CLIENT_DELETE_COMMAND = "client delete";
+    private static final String NAME_SEPARATOR = " /name ";
+    private static final String PHONE_SEPARATOR = " /phone ";
+    private static final String GOAL_SEPARATOR = " /goal ";
+    private static final String NOTES_SEPARATOR = " /notes ";
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
     private static final String TO_SEPARATOR = " /to ";
@@ -173,6 +182,131 @@ public class Parser {
             throw new KoaraException("Oops!!! Please specify a keyword to find.");
         }
         return keyword;
+    }
+
+    /**
+     * Parses a command that creates a client.
+     *
+     * @param command Client-add command entered by the user.
+     * @return Client represented by the command.
+     * @throws KoaraException If any required client field is missing.
+     */
+    public static Client parseClient(String command) throws KoaraException {
+        assert matchesCommand(command, CLIENT_ADD_COMMAND) : "Command must add a client";
+        String details = command.substring(CLIENT_ADD_COMMAND.length()).trim();
+        return parseClientDetails(details, false);
+    }
+
+    /**
+     * Parses a command that replaces a client's details.
+     *
+     * @param command Client-edit command entered by the user.
+     * @param clientCount Number of clients currently stored.
+     * @return Parsed client index and replacement details.
+     * @throws KoaraException If the index or client details are invalid.
+     */
+    public static ClientEdit parseClientEdit(String command, int clientCount) throws KoaraException {
+        assert matchesCommand(command, CLIENT_EDIT_COMMAND) : "Command must edit a client";
+        int nameSeparatorIndex = command.indexOf(NAME_SEPARATOR);
+        if (nameSeparatorIndex < 0) {
+            throw clientFormatException(CLIENT_EDIT_COMMAND + " INDEX /name");
+        }
+        String indexCommand = command.substring(0, nameSeparatorIndex);
+        int clientIndex = parseClientIndex(indexCommand, CLIENT_EDIT_COMMAND, clientCount);
+        String details = command.substring(nameSeparatorIndex + 1);
+        return new ClientEdit(clientIndex, parseClientDetails(details, true));
+    }
+
+    /**
+     * Parses the keyword from a client-find command.
+     *
+     * @param command Client-find command entered by the user.
+     * @return Keyword to search for.
+     * @throws KoaraException If the keyword is empty.
+     */
+    public static String parseClientKeyword(String command) throws KoaraException {
+        assert matchesCommand(command, CLIENT_FIND_COMMAND) : "Command must find clients";
+        String keyword = command.substring(CLIENT_FIND_COMMAND.length()).trim();
+        if (keyword.isEmpty()) {
+            throw new KoaraException("Please specify client information to find.");
+        }
+        return keyword;
+    }
+
+    /**
+     * Parses and validates a displayed client number.
+     *
+     * @param command Command containing the client number.
+     * @param action Client action being performed.
+     * @param clientCount Number of clients currently stored.
+     * @return Zero-based index of the selected client.
+     * @throws KoaraException If the client number is missing or invalid.
+     */
+    public static int parseClientIndex(String command, String action, int clientCount) throws KoaraException {
+        assert matchesCommand(command, action) : "Command must match the client action";
+        assert clientCount >= 0 : "Client count must not be negative";
+        String clientNumberText = command.substring(action.length()).trim();
+        if (clientNumberText.isEmpty()) {
+            throw new KoaraException("Please specify a client number to " + action.substring("client ".length()) + ".");
+        }
+
+        int clientNumber;
+        try {
+            clientNumber = Integer.parseInt(clientNumberText);
+        } catch (NumberFormatException exception) {
+            throw new KoaraException("The client number must be a whole number.");
+        }
+        if (clientNumber < 1 || clientNumber > clientCount) {
+            throw new KoaraException("That client number does not exist.");
+        }
+        return clientNumber - 1;
+    }
+
+    private static Client parseClientDetails(String details, boolean includesNameLabel) throws KoaraException {
+        String normalizedDetails = details;
+        int phoneIndex = normalizedDetails.indexOf(PHONE_SEPARATOR);
+        int goalIndex = normalizedDetails.indexOf(GOAL_SEPARATOR);
+        int notesIndex = normalizedDetails.indexOf(NOTES_SEPARATOR);
+        boolean hasInvalidOrder = phoneIndex < 0 || goalIndex < phoneIndex || notesIndex < goalIndex;
+        if (hasInvalidOrder) {
+            throw clientFormatException(CLIENT_ADD_COMMAND);
+        }
+
+        int nameStartIndex = includesNameLabel ? "/name ".length() : 0;
+        String name = normalizedDetails.substring(nameStartIndex, phoneIndex).trim();
+        String phone = normalizedDetails.substring(phoneIndex + PHONE_SEPARATOR.length(), goalIndex).trim();
+        String goal = normalizedDetails.substring(goalIndex + GOAL_SEPARATOR.length(), notesIndex).trim();
+        String notes = normalizedDetails.substring(notesIndex + NOTES_SEPARATOR.length()).trim();
+        if (name.isEmpty() || phone.isEmpty() || goal.isEmpty() || notes.isEmpty()) {
+            throw clientFormatException(CLIENT_ADD_COMMAND);
+        }
+        if (containsUnsupportedCharacter(name, phone, goal, notes)) {
+            throw new KoaraException("Client details cannot contain tabs or line breaks.");
+        }
+        return new Client(name, phone, goal, notes);
+    }
+
+    private static boolean containsUnsupportedCharacter(String... fields) {
+        for (String field : fields) {
+            if (field.contains("\t") || field.contains("\n") || field.contains("\r")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static KoaraException clientFormatException(String command) {
+        return new KoaraException("Use: " + command
+                + " NAME /phone PHONE /goal GOAL /notes NOTES");
+    }
+
+    /**
+     * Contains a parsed client-edit target and its replacement details.
+     *
+     * @param clientIndex Zero-based client index.
+     * @param client Replacement client details.
+     */
+    public record ClientEdit(int clientIndex, Client client) {
     }
 
     /**

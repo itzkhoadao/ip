@@ -17,6 +17,9 @@ public class Task {
      * @param additionalInformation Additional information displayed after the description.
      */
     public Task(TaskType taskType, String description, String additionalInformation) {
+        assert taskType != null : "Task type must not be null";
+        assert description != null && !description.isBlank() : "Task description must not be blank";
+        assert additionalInformation != null : "Additional task information must not be null";
         this.taskType = taskType;
         this.description = description;
         this.additionalInformation = additionalInformation;
@@ -53,6 +56,7 @@ public class Task {
      * @return True if the description contains the keyword.
      */
     public boolean containsKeyword(String keyword) {
+        assert keyword != null && !keyword.isBlank() : "Search keyword must not be blank";
         return description.contains(keyword);
     }
 

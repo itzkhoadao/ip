@@ -2,6 +2,7 @@ package koara.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -83,5 +84,14 @@ public class TaskListTest {
         TaskList matchingTasks = tasks.find("2019");
 
         assertEquals(0, matchingTasks.getSize());
+    }
+
+    @Test
+    public void taskOperations_invalidInternalArguments_throwAssertionError() {
+        TaskList tasks = new TaskList();
+
+        assertThrows(AssertionError.class, () -> tasks.add(null));
+        assertThrows(AssertionError.class, () -> tasks.get(0));
+        assertThrows(AssertionError.class, () -> tasks.find(""));
     }
 }

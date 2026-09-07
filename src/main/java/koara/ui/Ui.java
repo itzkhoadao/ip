@@ -6,9 +6,11 @@ import java.util.Scanner;
  * Handles interactions between Koara and the user.
  */
 public class Ui implements AutoCloseable {
+    private static final int DISPLAY_LINE_LENGTH = 60;
     private static final String DISPLAY_LINE_INDENT = "    ";
     private static final String DISPLAY_RESPONSE_INDENT = DISPLAY_LINE_INDENT + " ";
-    private static final String DISPLAY_HORIZONTAL_LINE = DISPLAY_LINE_INDENT + "_".repeat(60);
+    private static final String DISPLAY_HORIZONTAL_LINE =
+            DISPLAY_LINE_INDENT + "_".repeat(DISPLAY_LINE_LENGTH);
 
     private final Scanner scanner;
 

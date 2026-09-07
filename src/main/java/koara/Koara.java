@@ -14,6 +14,12 @@ import koara.ui.Ui;
  * Coordinates Koara's user interface, task list, parser, and storage.
  */
 public class Koara {
+    private static final String EXIT_COMMAND = "bye";
+    private static final String LIST_COMMAND = "list";
+    private static final String MARK_COMMAND = "mark";
+    private static final String UNMARK_COMMAND = "unmark";
+    private static final String DELETE_COMMAND = "delete";
+    private static final String FIND_COMMAND = "find";
     private static final Path DATA_FILE_PATH = Path.of("data", "koara.txt");
 
     private final Storage storage;
@@ -62,7 +68,7 @@ public class Koara {
                 ui.showLine();
                 ui.showResponse(getResponse(command));
                 ui.showLine();
-                if (command.equals("bye")) {
+                if (command.equals(EXIT_COMMAND)) {
                     break;
                 }
             }
@@ -86,7 +92,7 @@ public class Koara {
      */
     public String getResponse(String command) {
         assert command != null : "Command must not be null";
-        if (command.equals("bye")) {
+        if (command.equals(EXIT_COMMAND)) {
             return "Bye. Koara hopes to see you again soon!";
         }
 
@@ -106,35 +112,54 @@ public class Koara {
      */
     private String executeCommand(String command) throws KoaraException {
         assert command != null : "Command must not be null";
-        assert !command.equals("bye") : "Exit command must be handled before execution";
-        if (command.equals("list")) {
+        assert !command.equals(EXIT_COMMAND) : "Exit command must be handled before execution";
+        if (command.equals(LIST_COMMAND)) {
             return formatTaskList("Here are the tasks in your list:", tasks);
         }
-        if (Parser.matchesCommand(command, "mark")) {
-            int taskIndex = Parser.parseTaskIndex(command, "mark", tasks.getSize());
-            tasks.mark(taskIndex);
-            storage.save(tasks);
-            return "Nice! I've marked this task as done:\n  " + tasks.get(taskIndex);
+        if (Parser.matchesCommand(command, MARK_COMMAND)) {
+            return markTask(command);
         }
-        if (Parser.matchesCommand(command, "unmark")) {
-            int taskIndex = Parser.parseTaskIndex(command, "unmark", tasks.getSize());
-            tasks.unmark(taskIndex);
-            storage.save(tasks);
-            return "OK, I've marked this task as not done yet:\n  " + tasks.get(taskIndex);
+        if (Parser.matchesCommand(command, UNMARK_COMMAND)) {
+            return unmarkTask(command);
         }
-        if (Parser.matchesCommand(command, "delete")) {
-            int taskIndex = Parser.parseTaskIndex(command, "delete", tasks.getSize());
-            Task removedTask = tasks.delete(taskIndex);
-            storage.save(tasks);
-            return "Noted. I've removed this task:\n  " + removedTask
-                    + "\nNow you have " + tasks.getSize() + " tasks in the list.";
+        if (Parser.matchesCommand(command, DELETE_COMMAND)) {
+            return deleteTask(command);
         }
-        if (Parser.matchesCommand(command, "find")) {
-            String keyword = Parser.parseFindKeyword(command);
-            return formatTaskList("Here are the matching tasks in your list:",
-                    tasks.find(keyword));
+        if (Parser.matchesCommand(command, FIND_COMMAND)) {
+            return findTasks(command);
         }
+        return addTask(command);
+    }
 
+    private String markTask(String command) throws KoaraException {
+        int taskIndex = Parser.parseTaskIndex(command, MARK_COMMAND, tasks.getSize());
+        tasks.mark(taskIndex);
+        storage.save(tasks);
+        return "Nice! I've marked this task as done:\n  " + tasks.get(taskIndex);
+    }
+
+    private String unmarkTask(String command) throws KoaraException {
+        int taskIndex = Parser.parseTaskIndex(command, UNMARK_COMMAND, tasks.getSize());
+        tasks.unmark(taskIndex);
+        storage.save(tasks);
+        return "OK, I've marked this task as not done yet:\n  " + tasks.get(taskIndex);
+    }
+
+    private String deleteTask(String command) throws KoaraException {
+        int taskIndex = Parser.parseTaskIndex(command, DELETE_COMMAND, tasks.getSize());
+        Task removedTask = tasks.delete(taskIndex);
+        storage.save(tasks);
+        return "Noted. I've removed this task:\n  " + removedTask
+                + "\nNow you have " + tasks.getSize() + " tasks in the list.";
+    }
+
+    private String findTasks(String command) throws KoaraException {
+        String keyword = Parser.parseFindKeyword(command);
+        TaskList matchingTasks = tasks.find(keyword);
+        return formatTaskList("Here are the matching tasks in your list:", matchingTasks);
+    }
+
+    private String addTask(String command) throws KoaraException {
         Task task = Parser.parseTask(command);
         tasks.add(task);
         storage.save(tasks);

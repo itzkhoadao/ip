@@ -2,6 +2,8 @@ package koara;
 
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import koara.exception.KoaraException;
 import koara.parser.Parser;
@@ -177,11 +179,10 @@ public class Koara {
     private static String formatTaskList(String heading, TaskList taskList) {
         assert heading != null : "Task list heading must not be null";
         assert taskList != null : "Task list must not be null";
-        StringBuilder response = new StringBuilder(heading);
-        for (int i = 0; i < taskList.getSize(); i++) {
-            response.append("\n").append(i + 1).append(".").append(taskList.get(i));
-        }
-        return response.toString();
+        String formattedTasks = IntStream.range(0, taskList.getSize())
+                .mapToObj(index -> "\n" + (index + 1) + "." + taskList.get(index))
+                .collect(Collectors.joining());
+        return heading + formattedTasks;
     }
 
     /**

@@ -1,6 +1,7 @@
 package koara.task;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Manages the tasks stored by Koara.
@@ -95,12 +96,9 @@ public class TaskList {
      */
     public TaskList find(String keyword) {
         assert keyword != null && !keyword.isBlank() : "Search keyword must not be blank";
-        ArrayList<Task> matchingTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.containsKeyword(keyword)) {
-                matchingTasks.add(task);
-            }
-        }
+        ArrayList<Task> matchingTasks = tasks.stream()
+                .filter(task -> task.containsKeyword(keyword))
+                .collect(Collectors.toCollection(ArrayList::new));
         return new TaskList(matchingTasks);
     }
 
@@ -110,10 +108,8 @@ public class TaskList {
      * @return Serialized task lines.
      */
     public ArrayList<String> toDataLines() {
-        ArrayList<String> taskLines = new ArrayList<>();
-        for (Task task : tasks) {
-            taskLines.add(task.toDataString());
-        }
-        return taskLines;
+        return tasks.stream()
+                .map(Task::toDataString)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

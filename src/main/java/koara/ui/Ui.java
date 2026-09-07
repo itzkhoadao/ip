@@ -1,5 +1,6 @@
 package koara.ui;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -69,9 +70,9 @@ public class Ui implements AutoCloseable {
      * @param responses Responses to display.
      */
     public void showResponse(String... responses) {
-        for (String response : responses) {
-            response.lines().forEach(this::showMessage);
-        }
+        Arrays.stream(responses)
+                .flatMap(String::lines)
+                .forEach(this::showMessage);
     }
 
     private void showMessage(String message) {

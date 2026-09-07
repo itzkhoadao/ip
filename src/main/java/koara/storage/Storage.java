@@ -19,7 +19,23 @@ import koara.task.Todo;
  * Loads tasks from the data file and saves tasks to it.
  */
 public class Storage {
+    private static final String DATA_SEPARATOR_REGEX = " \\| ";
+    private static final String TODO_TYPE = "T";
+    private static final String DEADLINE_TYPE = "D";
+    private static final String EVENT_TYPE = "E";
+    private static final String INCOMPLETE_STATUS = "0";
+    private static final String COMPLETE_STATUS = "1";
     private static final String INVALID_SAVED_DATA_ERROR = "Sorry, the saved task data is invalid.";
+    private static final int TASK_TYPE_INDEX = 0;
+    private static final int TASK_STATUS_INDEX = 1;
+    private static final int TASK_DESCRIPTION_INDEX = 2;
+    private static final int DEADLINE_DATE_INDEX = 3;
+    private static final int EVENT_START_DATE_INDEX = 3;
+    private static final int EVENT_END_DATE_INDEX = 4;
+    private static final int MINIMUM_TASK_PART_COUNT = 3;
+    private static final int TODO_PART_COUNT = 3;
+    private static final int DEADLINE_PART_COUNT = 4;
+    private static final int EVENT_PART_COUNT = 5;
 
     private final Path dataFilePath;
 
@@ -83,43 +99,67 @@ public class Storage {
      */
     private Task parseStoredTask(String taskLine) throws KoaraException {
         assert taskLine != null : "Stored task line must not be null";
-        String[] taskParts = taskLine.split(" \\| ", -1);
-        if (taskParts.length < 3 || taskParts[2].isEmpty()) {
+        String[] taskParts = taskLine.split(DATA_SEPARATOR_REGEX, -1);
+        if (taskParts.length < MINIMUM_TASK_PART_COUNT || taskParts[TASK_DESCRIPTION_INDEX].isEmpty()) {
             throw new KoaraException(INVALID_SAVED_DATA_ERROR);
         }
 
-        Task task;
-        switch (taskParts[0]) {
-            case "T":
-                if (taskParts.length != 3) {
-                    throw new KoaraException(INVALID_SAVED_DATA_ERROR);
-                }
-                task = new Todo(taskParts[2]);
-                break;
-            case "D":
-                if (taskParts.length != 4 || taskParts[3].isEmpty()) {
-                    throw new KoaraException(INVALID_SAVED_DATA_ERROR);
-                }
-                task = new Deadline(taskParts[2], parseDate(taskParts[3]));
-                break;
-            case "E":
-                if (taskParts.length != 5 || taskParts[3].isEmpty() || taskParts[4].isEmpty()) {
-                    throw new KoaraException(INVALID_SAVED_DATA_ERROR);
-                }
-                LocalDate startDate = parseDate(taskParts[3]);
-                LocalDate endDate = parseDate(taskParts[4]);
-                task = new Event(taskParts[2], startDate, endDate);
-                break;
+        Task task = createTask(taskParts);
+        applyCompletionStatus(task, taskParts[TASK_STATUS_INDEX]);
+        return task;
+    }
+
+    private Task createTask(String[] taskParts) throws KoaraException {
+        String taskType = taskParts[TASK_TYPE_INDEX];
+        switch (taskType) {
+            case TODO_TYPE:
+                return createTodo(taskParts);
+            case DEADLINE_TYPE:
+                return createDeadline(taskParts);
+            case EVENT_TYPE:
+                return createEvent(taskParts);
             default:
                 throw new KoaraException(INVALID_SAVED_DATA_ERROR);
         }
+    }
 
-        if (taskParts[1].equals("1")) {
-            task.markAsDone();
-        } else if (!taskParts[1].equals("0")) {
+    private Todo createTodo(String[] taskParts) throws KoaraException {
+        if (taskParts.length != TODO_PART_COUNT) {
             throw new KoaraException(INVALID_SAVED_DATA_ERROR);
         }
-        return task;
+        return new Todo(taskParts[TASK_DESCRIPTION_INDEX]);
+    }
+
+    private Deadline createDeadline(String[] taskParts) throws KoaraException {
+        boolean hasInvalidDate = taskParts.length != DEADLINE_PART_COUNT
+                || taskParts[DEADLINE_DATE_INDEX].isEmpty();
+        if (hasInvalidDate) {
+            throw new KoaraException(INVALID_SAVED_DATA_ERROR);
+        }
+        LocalDate dueDate = parseDate(taskParts[DEADLINE_DATE_INDEX]);
+        return new Deadline(taskParts[TASK_DESCRIPTION_INDEX], dueDate);
+    }
+
+    private Event createEvent(String[] taskParts) throws KoaraException {
+        boolean hasInvalidDates = taskParts.length != EVENT_PART_COUNT
+                || taskParts[EVENT_START_DATE_INDEX].isEmpty()
+                || taskParts[EVENT_END_DATE_INDEX].isEmpty();
+        if (hasInvalidDates) {
+            throw new KoaraException(INVALID_SAVED_DATA_ERROR);
+        }
+        LocalDate startDate = parseDate(taskParts[EVENT_START_DATE_INDEX]);
+        LocalDate endDate = parseDate(taskParts[EVENT_END_DATE_INDEX]);
+        return new Event(taskParts[TASK_DESCRIPTION_INDEX], startDate, endDate);
+    }
+
+    private void applyCompletionStatus(Task task, String completionStatus) throws KoaraException {
+        if (completionStatus.equals(COMPLETE_STATUS)) {
+            task.markAsDone();
+            return;
+        }
+        if (!completionStatus.equals(INCOMPLETE_STATUS)) {
+            throw new KoaraException(INVALID_SAVED_DATA_ERROR);
+        }
     }
 
     /**
@@ -129,7 +169,7 @@ public class Storage {
      * @return Parsed date.
      * @throws KoaraException If the stored date is invalid.
      */
-    private LocalDate parseDate(String dateText) throws KoaraException {
+    private static LocalDate parseDate(String dateText) throws KoaraException {
         assert dateText != null && !dateText.isBlank() : "Stored date text must not be blank";
         try {
             return LocalDate.parse(dateText);

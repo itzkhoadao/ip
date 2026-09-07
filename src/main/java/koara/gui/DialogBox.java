@@ -41,6 +41,8 @@ public class DialogBox extends HBox {
             throw new RuntimeException("Unable to load a dialog box.", exception);
         }
 
+        assert dialogText != null : "FXML loader must inject the dialog label";
+        assert displayPicture != null : "FXML loader must inject the display picture";
         dialogText.setText(text);
         displayPicture.setImage(image);
     }

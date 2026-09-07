@@ -39,6 +39,7 @@ public class Koara {
      * @param dataFilePath Path of the data file.
      */
     public Koara(Path dataFilePath) {
+        assert dataFilePath != null : "Data file path must not be null";
         storage = new Storage(dataFilePath);
         TaskList loadedTasks;
         String loadError = null;
@@ -90,6 +91,7 @@ public class Koara {
      * @return User-facing response to the command.
      */
     public String getResponse(String command) {
+        assert command != null : "Command must not be null";
         if (command.equals(EXIT_COMMAND)) {
             return "Bye. Koara hopes to see you again soon!";
         }
@@ -109,6 +111,8 @@ public class Koara {
      * @throws KoaraException If the command is invalid or a change cannot be saved.
      */
     private String executeCommand(String command) throws KoaraException {
+        assert command != null : "Command must not be null";
+        assert !command.equals(EXIT_COMMAND) : "Exit command must be handled before execution";
         if (command.equals(LIST_COMMAND)) {
             return formatTaskList("Here are the tasks in your list:", tasks);
         }
@@ -171,6 +175,8 @@ public class Koara {
      * @return Formatted task-list response.
      */
     private static String formatTaskList(String heading, TaskList taskList) {
+        assert heading != null : "Task list heading must not be null";
+        assert taskList != null : "Task list must not be null";
         StringBuilder response = new StringBuilder(heading);
         for (int i = 0; i < taskList.getSize(); i++) {
             response.append("\n").append(i + 1).append(".").append(taskList.get(i));

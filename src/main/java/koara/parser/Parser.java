@@ -33,6 +33,8 @@ public class Parser {
      * @return True if the command uses the keyword.
      */
     public static boolean matchesCommand(String command, String keyword) {
+        assert command != null : "Command must not be null";
+        assert keyword != null && !keyword.isBlank() : "Command keyword must not be blank";
         return command.equals(keyword) || command.startsWith(keyword + " ");
     }
 
@@ -44,6 +46,7 @@ public class Parser {
      * @throws KoaraException If the command is invalid.
      */
     public static Task parseTask(String command) throws KoaraException {
+        assert command != null : "Command must not be null";
         if (matchesCommand(command, TODO_COMMAND)) {
             return parseTodo(command);
         }
@@ -134,6 +137,9 @@ public class Parser {
      * @throws KoaraException If the task number is missing or invalid.
      */
     public static int parseTaskIndex(String command, String action, int taskCount) throws KoaraException {
+        assert action != null && !action.isBlank() : "Task action must not be blank";
+        assert matchesCommand(command, action) : "Command must match the task action";
+        assert taskCount >= 0 : "Task count must not be negative";
         String taskNumberText = command.substring(action.length()).trim();
         if (taskNumberText.isEmpty()) {
             throw new KoaraException("Sorry for the inconvenience!!! Please specify a task number to "
@@ -161,6 +167,7 @@ public class Parser {
      * @throws KoaraException If the keyword is empty.
      */
     public static String parseFindKeyword(String command) throws KoaraException {
+        assert matchesCommand(command, FIND_COMMAND) : "Command must be a find command";
         String keyword = command.substring(FIND_COMMAND.length()).trim();
         if (keyword.isEmpty()) {
             throw new KoaraException("Oops!!! Please specify a keyword to find.");
@@ -176,6 +183,7 @@ public class Parser {
      * @throws KoaraException If the text is not a valid date in yyyy-MM-dd format.
      */
     private static LocalDate parseDate(String dateText) throws KoaraException {
+        assert dateText != null && !dateText.isBlank() : "Date text must not be blank";
         try {
             return LocalDate.parse(dateText);
         } catch (DateTimeParseException exception) {

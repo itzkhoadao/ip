@@ -60,6 +60,15 @@ public class ClientStorageTest {
     }
 
     @Test
+    public void load_invalidPhone_throwsKoaraException() throws IOException {
+        Path filePath = tempDirectory.resolve("clients.txt");
+        Files.writeString(filePath, "Alex Tan\t1 2 3 4\tRun 5 km\tHealthy");
+        ClientStorage storage = new ClientStorage(filePath);
+
+        assertThrows(KoaraException.class, storage::load);
+    }
+
+    @Test
     public void load_duplicateClientIdentity_throwsKoaraException() throws IOException {
         Path filePath = tempDirectory.resolve("clients.txt");
         Files.writeString(filePath, "Alex Tan\t91234567\tRun\tHealthy\n"

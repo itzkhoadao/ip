@@ -37,9 +37,21 @@ public class ClientTest {
     }
 
     @Test
+    public void isValidPhone_variedFormats_validatesActualDigitCount() {
+        assertTrue(Client.isValidPhone("91234567"));
+        assertTrue(Client.isValidPhone("+65 9123 4567"));
+        assertFalse(Client.isValidPhone("1 2 3 4"));
+        assertFalse(Client.isValidPhone("+       "));
+        assertFalse(Client.isValidPhone("9123abcd"));
+        assertFalse(Client.isValidPhone("12345678901234567"));
+        assertFalse(Client.isValidPhone(null));
+    }
+
+    @Test
     public void constructorAndSearch_invalidInternalArguments_throwAssertionError() {
         assertThrows(AssertionError.class, () -> new Client("", "91234567", "Run", "Healthy"));
         assertThrows(AssertionError.class, () -> new Client("Alex", "", "Run", "Healthy"));
+        assertThrows(AssertionError.class, () -> new Client("Alex", "1 2 3 4", "Run", "Healthy"));
         assertThrows(AssertionError.class, () -> new Client("Alex", "91234567", "", "Healthy"));
         assertThrows(AssertionError.class, () -> new Client("Alex", "91234567", "Run", ""));
         Client client = new Client("Alex", "91234567", "Run", "Healthy");

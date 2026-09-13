@@ -29,7 +29,6 @@ public class Parser {
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
     private static final String TO_SEPARATOR = " /to ";
-    private static final String PHONE_PATTERN = "\\+?[0-9 ]{7,16}";
     private static final String STORAGE_SEPARATOR = "|";
     private static final String DATE_FORMAT_ERROR =
             "Alamak, that date is not it. Use yyyy-MM-dd, for example 2026-09-13.";
@@ -311,7 +310,7 @@ public class Parser {
         if (name.isEmpty() || phone.isEmpty() || goal.isEmpty() || notes.isEmpty()) {
             throw clientFormatException(CLIENT_ADD_COMMAND);
         }
-        if (!phone.matches(PHONE_PATTERN)) {
+        if (!Client.isValidPhone(phone)) {
             throw new KoaraException("That phone number does not look valid. Use 7–16 digits with an optional +.");
         }
         if (containsUnsupportedCharacter(name, phone, goal, notes)) {

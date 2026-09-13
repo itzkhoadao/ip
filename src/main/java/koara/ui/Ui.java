@@ -35,7 +35,8 @@ public class Ui implements AutoCloseable {
                 """;
         showLine();
         System.out.print(banner.indent(DISPLAY_RESPONSE_INDENT.length()));
-        showResponse("Hello! I'm Koara.", "What can I do for you?");
+        showResponse("Wassup! Koara here—your steady productivity sidekick.",
+                "Drop me a task and let's lock in.");
         showLine();
     }
 

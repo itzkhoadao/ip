@@ -126,7 +126,8 @@ public class Koara {
     public CommandResult getCommandResult(String command) {
         assert command != null : "Command must not be null";
         if (command.equals(EXIT_COMMAND)) {
-            return new CommandResult("Bye. Koara hopes to see you again soon!", false);
+            return new CommandResult(
+                    "See ya later! Koara is always here for you—go get that W.", false);
         }
 
         try {
@@ -156,10 +157,10 @@ public class Koara {
         assert command != null : "Command must not be null";
         assert !command.equals(EXIT_COMMAND) : "Exit command must be handled before execution";
         if (command.equals(LIST_COMMAND)) {
-            return formatTaskList("Here are the tasks in your list:", tasks);
+            return formatTaskList("Your game plan—steady lah:", tasks);
         }
         if (command.equals(CLIENT_LIST_COMMAND)) {
-            return formatClientList("Here are your clients:", clients);
+            return formatClientList("Your client lineup—steady lah:", clients);
         }
         if (Parser.matchesCommand(command, CLIENT_ADD_COMMAND)) {
             return addClient(command);
@@ -192,65 +193,65 @@ public class Koara {
         int taskIndex = Parser.parseTaskIndex(command, MARK_COMMAND, tasks.getSize());
         tasks.mark(taskIndex);
         storage.save(tasks);
-        return "Nice! I've marked this task as done:\n  " + tasks.get(taskIndex);
+        return "Shiok! That's a W—task done:\n  " + tasks.get(taskIndex);
     }
 
     private String unmarkTask(String command) throws KoaraException {
         int taskIndex = Parser.parseTaskIndex(command, UNMARK_COMMAND, tasks.getSize());
         tasks.unmark(taskIndex);
         storage.save(tasks);
-        return "OK, I've marked this task as not done yet:\n  " + tasks.get(taskIndex);
+        return "No stress lah—this task is back on the radar:\n  " + tasks.get(taskIndex);
     }
 
     private String deleteTask(String command) throws KoaraException {
         int taskIndex = Parser.parseTaskIndex(command, DELETE_COMMAND, tasks.getSize());
         Task removedTask = tasks.delete(taskIndex);
         storage.save(tasks);
-        return "Noted. I've removed this task:\n  " + removedTask
-                + "\nNow you have " + tasks.getSize() + " tasks in the list.";
+        return "Clean slate energy—removed this task:\n  " + removedTask
+                + "\nYou have " + formatTaskCount(tasks.getSize()) + " left. Keep cooking!";
     }
 
     private String findTasks(String command) throws KoaraException {
         String keyword = Parser.parseFindKeyword(command);
         TaskList matchingTasks = tasks.find(keyword);
-        return formatTaskList("Here are the matching tasks in your list:", matchingTasks);
+        return formatTaskList("Found them—here's the matching lineup:", matchingTasks);
     }
 
     private String addTask(String command) throws KoaraException {
         Task task = Parser.parseTask(command);
         tasks.add(task);
         storage.save(tasks);
-        return "Got it. I've added this task:\n  " + task
-                + "\nNow you have " + tasks.getSize() + " tasks in the list.";
+        return "Ayo, locked in! Added this task:\n  " + task
+                + "\nYou now have " + formatTaskCount(tasks.getSize()) + ". We move!";
     }
 
     private String addClient(String command) throws KoaraException {
         Client client = Parser.parseClient(command);
         clients.add(client);
         clientStorage.save(clients);
-        return "Added this client:\n  " + client
-                + "\nNow you have " + formatClientCount(clients.getSize()) + ".";
+        return "Ayo, client locked in:\n  " + client
+                + "\nYou now have " + formatClientCount(clients.getSize()) + ". Steady!";
     }
 
     private String editClient(String command) throws KoaraException {
         ClientEdit clientEdit = Parser.parseClientEdit(command, clients.getSize());
         clients.update(clientEdit.clientIndex(), clientEdit.client());
         clientStorage.save(clients);
-        return "Updated this client:\n  " + clientEdit.client();
+        return "Glow-up complete—updated this client:\n  " + clientEdit.client();
     }
 
     private String findClients(String command) throws KoaraException {
         String keyword = Parser.parseClientKeyword(command);
         ClientList matchingClients = clients.find(keyword);
-        return formatClientList("Here are the matching clients:", matchingClients);
+        return formatClientList("Found them—here's the matching client lineup:", matchingClients);
     }
 
     private String deleteClient(String command) throws KoaraException {
         int clientIndex = Parser.parseClientIndex(command, CLIENT_DELETE_COMMAND, clients.getSize());
         Client removedClient = clients.delete(clientIndex);
         clientStorage.save(clients);
-        return "Removed this client:\n  " + removedClient
-                + "\nNow you have " + formatClientCount(clients.getSize()) + ".";
+        return "Clean slate energy—removed this client:\n  " + removedClient
+                + "\nYou now have " + formatClientCount(clients.getSize()) + ".";
     }
 
     /**
@@ -284,6 +285,10 @@ public class Koara {
 
     private static String formatClientCount(int clientCount) {
         return clientCount + (clientCount == 1 ? " client" : " clients");
+    }
+
+    private static String formatTaskCount(int taskCount) {
+        return taskCount + (taskCount == 1 ? " task" : " tasks");
     }
 
     /**

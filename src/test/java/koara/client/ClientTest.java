@@ -1,6 +1,8 @@
 package koara.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -17,9 +19,31 @@ public class ClientTest {
         assertTrue(client.containsKeyword("alex"));
         assertTrue(client.containsKeyword("KNEE"));
         assertFalse(client.containsKeyword("swimming"));
-        assertTrue(client.toString().contains("Phone: 91234567"));
-        assertTrue(client.toString().contains("Goal: Run 5 km"));
-        assertTrue(client.toString().contains("Notes: Knee injury"));
-        assertTrue(client.toDataString().equals("Alex Tan\t91234567\tRun 5 km\tKnee injury"));
+        assertEquals("Alex Tan | Phone: 91234567 | Goal: Run 5 km | Notes: Knee injury",
+                client.toString());
+        assertEquals("Alex Tan\t91234567\tRun 5 km\tKnee injury", client.toDataString());
+    }
+
+    @Test
+    public void hasSameIdentity_matchingNameOrNormalizedPhone_returnsTrue() {
+        Client client = new Client("Alex Tan", "+65 91234567", "Run", "Healthy");
+
+        assertTrue(client.hasSameIdentity(new Client(
+                "alex tan", "80000000", "Swim", "Healthy")));
+        assertTrue(client.hasSameIdentity(new Client(
+                "Beth Lee", "+6591234567", "Swim", "Healthy")));
+        assertFalse(client.hasSameIdentity(new Client(
+                "Beth Lee", "80000000", "Swim", "Healthy")));
+    }
+
+    @Test
+    public void constructorAndSearch_invalidInternalArguments_throwAssertionError() {
+        assertThrows(AssertionError.class, () -> new Client("", "91234567", "Run", "Healthy"));
+        assertThrows(AssertionError.class, () -> new Client("Alex", "", "Run", "Healthy"));
+        assertThrows(AssertionError.class, () -> new Client("Alex", "91234567", "", "Healthy"));
+        assertThrows(AssertionError.class, () -> new Client("Alex", "91234567", "Run", ""));
+        Client client = new Client("Alex", "91234567", "Run", "Healthy");
+        assertThrows(AssertionError.class, () -> client.containsKeyword(" "));
+        assertThrows(AssertionError.class, () -> client.hasSameIdentity(null));
     }
 }

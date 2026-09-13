@@ -1,7 +1,10 @@
 package koara.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,5 +44,42 @@ public class ClientListTest {
         sourceClients.clear();
 
         assertEquals(1, clients.getSize());
+    }
+
+    @Test
+    public void containsDuplicate_excludedClientAndOtherIdentity_returnsExpectedResult() {
+        Client alex = new Client("Alex Tan", "91234567", "Run", "Healthy");
+        Client beth = new Client("Beth Lee", "92345678", "Swim", "Healthy");
+        ClientList clients = new ClientList(new ArrayList<>(List.of(alex, beth)));
+
+        assertTrue(clients.containsDuplicate(
+                new Client("alex tan", "80000000", "Run", "Healthy"), -1));
+        assertTrue(clients.containsDuplicate(
+                new Client("Chris", "92345678", "Run", "Healthy"), -1));
+        assertFalse(clients.containsDuplicate(
+                new Client("Alex Tan", "91234567", "Run faster", "Healthy"), 0));
+        assertEquals(0, clients.find("missing").getSize());
+    }
+
+    @Test
+    public void insertAndInvalidInternalArguments_behaveAsExpected() {
+        ClientList clients = new ClientList();
+        Client alex = new Client("Alex", "91234567", "Run", "Healthy");
+        clients.insert(0, alex);
+        assertSame(alex, clients.get(0));
+
+        assertThrows(AssertionError.class, () -> clients.add(null));
+        assertThrows(AssertionError.class, () -> clients.insert(2, alex));
+        assertThrows(AssertionError.class, () -> clients.insert(0, null));
+        assertThrows(AssertionError.class, () -> clients.get(2));
+        assertThrows(AssertionError.class, () -> clients.update(2, alex));
+        assertThrows(AssertionError.class, () -> clients.update(0, null));
+        assertThrows(AssertionError.class, () -> clients.delete(2));
+        assertThrows(AssertionError.class, () -> clients.find(""));
+        assertThrows(AssertionError.class, () -> clients.containsDuplicate(null, -1));
+        assertThrows(AssertionError.class, () -> clients.containsDuplicate(alex, 1));
+        assertThrows(AssertionError.class, () -> new ClientList(null));
+        assertThrows(AssertionError.class, () -> new ClientList(
+                new ArrayList<>(java.util.Arrays.asList((Client) null))));
     }
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -43,6 +44,13 @@ public class ClientStorageTest {
     }
 
     @Test
+    public void load_missingFile_returnsEmptyClientList() throws KoaraException {
+        ClientStorage storage = new ClientStorage(tempDirectory.resolve("missing.txt"));
+
+        assertEquals(0, storage.load().getSize());
+    }
+
+    @Test
     public void load_invalidClientData_throwsKoaraException() throws IOException {
         Path filePath = tempDirectory.resolve("clients.txt");
         Files.writeString(filePath, "Alex Tan\t91234567\t\tKnee injury");
@@ -67,5 +75,41 @@ public class ClientStorageTest {
         ClientStorage storage = new ClientStorage(directoryPath);
 
         assertThrows(KoaraException.class, () -> storage.save(new ClientList()));
+    }
+
+    @Test
+    public void load_invalidFieldCountsAndDuplicateName_throwKoaraException() throws IOException {
+        Path filePath = tempDirectory.resolve("clients.txt");
+        ClientStorage storage = new ClientStorage(filePath);
+
+        Files.writeString(filePath, "Alex\t91234567\tRun");
+        assertThrows(KoaraException.class, storage::load);
+        Files.writeString(filePath, "Alex\t91234567\tRun\tHealthy\textra");
+        assertThrows(KoaraException.class, storage::load);
+        Files.writeString(filePath, "Alex\t91234567\tRun\tHealthy\n"
+                + "alex\t92345678\tSwim\tHealthy");
+        assertThrows(KoaraException.class, storage::load);
+    }
+
+    @Test
+    public void save_replacesExistingFileAndRemovesTemporaryFile() throws Exception {
+        Path filePath = tempDirectory.resolve("data").resolve("clients.txt");
+        Files.createDirectories(filePath.getParent());
+        Files.writeString(filePath, "old data");
+        ClientStorage storage = new ClientStorage(filePath);
+        ClientList clients = new ClientList();
+        clients.add(new Client("Alex", "91234567", "Run", "Healthy"));
+
+        storage.save(clients);
+
+        assertEquals(List.of("Alex\t91234567\tRun\tHealthy"), Files.readAllLines(filePath));
+        try (Stream<Path> savedFiles = Files.list(filePath.getParent())) {
+            assertEquals(1, savedFiles.count());
+        }
+    }
+
+    @Test
+    public void constructor_nullPath_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> new ClientStorage(null));
     }
 }

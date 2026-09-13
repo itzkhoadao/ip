@@ -192,22 +192,39 @@ public class Koara {
 
     private String markTask(String command) throws KoaraException {
         int taskIndex = Parser.parseTaskIndex(command, MARK_COMMAND, tasks.getSize());
+        boolean wasDone = tasks.get(taskIndex).isDone();
         tasks.mark(taskIndex);
-        storage.save(tasks);
+        try {
+            storage.save(tasks);
+        } catch (KoaraException exception) {
+            restoreTaskStatus(taskIndex, wasDone);
+            throw exception;
+        }
         return "Shiok! That's a W—task done:\n  " + tasks.get(taskIndex);
     }
 
     private String unmarkTask(String command) throws KoaraException {
         int taskIndex = Parser.parseTaskIndex(command, UNMARK_COMMAND, tasks.getSize());
+        boolean wasDone = tasks.get(taskIndex).isDone();
         tasks.unmark(taskIndex);
-        storage.save(tasks);
+        try {
+            storage.save(tasks);
+        } catch (KoaraException exception) {
+            restoreTaskStatus(taskIndex, wasDone);
+            throw exception;
+        }
         return "No stress lah—this task is back on the radar:\n  " + tasks.get(taskIndex);
     }
 
     private String deleteTask(String command) throws KoaraException {
         int taskIndex = Parser.parseTaskIndex(command, DELETE_COMMAND, tasks.getSize());
         Task removedTask = tasks.delete(taskIndex);
-        storage.save(tasks);
+        try {
+            storage.save(tasks);
+        } catch (KoaraException exception) {
+            tasks.insert(taskIndex, removedTask);
+            throw exception;
+        }
         return "Clean slate energy—removed this task:\n  " + removedTask
                 + "\nYou have " + formatTaskCount(tasks.getSize()) + " left. Keep cooking!";
     }
@@ -224,7 +241,12 @@ public class Koara {
             throw new KoaraException("That task is already on the board—no need to double-book it.");
         }
         tasks.add(task);
-        storage.save(tasks);
+        try {
+            storage.save(tasks);
+        } catch (KoaraException exception) {
+            tasks.delete(tasks.getSize() - 1);
+            throw exception;
+        }
         return "Ayo, locked in! Added this task:\n  " + task
                 + "\nYou now have " + formatTaskCount(tasks.getSize()) + ". We move!";
     }
@@ -235,7 +257,12 @@ public class Koara {
             throw new KoaraException("That client name or phone number is already in your lineup.");
         }
         clients.add(client);
-        clientStorage.save(clients);
+        try {
+            clientStorage.save(clients);
+        } catch (KoaraException exception) {
+            clients.delete(clients.getSize() - 1);
+            throw exception;
+        }
         return "Ayo, client locked in:\n  " + client
                 + "\nYou now have " + formatClientCount(clients.getSize()) + ". Steady!";
     }
@@ -245,8 +272,14 @@ public class Koara {
         if (clients.containsDuplicate(clientEdit.client(), clientEdit.clientIndex())) {
             throw new KoaraException("That client name or phone number already belongs to someone else.");
         }
+        Client previousClient = clients.get(clientEdit.clientIndex());
         clients.update(clientEdit.clientIndex(), clientEdit.client());
-        clientStorage.save(clients);
+        try {
+            clientStorage.save(clients);
+        } catch (KoaraException exception) {
+            clients.update(clientEdit.clientIndex(), previousClient);
+            throw exception;
+        }
         return "Glow-up complete—updated this client:\n  " + clientEdit.client();
     }
 
@@ -259,7 +292,12 @@ public class Koara {
     private String deleteClient(String command) throws KoaraException {
         int clientIndex = Parser.parseClientIndex(command, CLIENT_DELETE_COMMAND, clients.getSize());
         Client removedClient = clients.delete(clientIndex);
-        clientStorage.save(clients);
+        try {
+            clientStorage.save(clients);
+        } catch (KoaraException exception) {
+            clients.insert(clientIndex, removedClient);
+            throw exception;
+        }
         return "Clean slate energy—removed this client:\n  " + removedClient
                 + "\nYou now have " + formatClientCount(clients.getSize()) + ".";
     }
@@ -299,6 +337,14 @@ public class Koara {
 
     private static String formatTaskCount(int taskCount) {
         return taskCount + (taskCount == 1 ? " task" : " tasks");
+    }
+
+    private void restoreTaskStatus(int taskIndex, boolean wasDone) {
+        if (wasDone) {
+            tasks.mark(taskIndex);
+        } else {
+            tasks.unmark(taskIndex);
+        }
     }
 
     /**

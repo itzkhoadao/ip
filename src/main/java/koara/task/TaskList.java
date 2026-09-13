@@ -58,6 +58,18 @@ public class TaskList {
     }
 
     /**
+     * Inserts a task at a specified zero-based index.
+     *
+     * @param index Position at which to insert the task.
+     * @param task Task to insert.
+     */
+    public void insert(int index, Task task) {
+        assert index >= 0 && index <= tasks.size() : "Task insertion index must be within the list";
+        assert task != null : "Task to insert must not be null";
+        tasks.add(index, task);
+    }
+
+    /**
      * Returns whether an equivalent task is already in the list.
      *
      * @param task Task whose details should be checked.

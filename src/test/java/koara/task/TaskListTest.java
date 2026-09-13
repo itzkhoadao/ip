@@ -1,8 +1,10 @@
 package koara.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -87,11 +89,34 @@ public class TaskListTest {
     }
 
     @Test
+    public void containsEquivalentAndInsert_variedTasks_preservesOrder() {
+        TaskList tasks = new TaskList();
+        Todo todo = new Todo("read book");
+        Deadline deadline = new Deadline("submit", LocalDate.of(2026, 9, 13));
+        tasks.add(todo);
+
+        assertTrue(tasks.containsEquivalent(new Todo("read book")));
+        assertFalse(tasks.containsEquivalent(new Todo("write book")));
+        tasks.insert(0, deadline);
+        assertSame(deadline, tasks.get(0));
+        assertSame(todo, tasks.get(1));
+    }
+
+    @Test
     public void taskOperations_invalidInternalArguments_throwAssertionError() {
         TaskList tasks = new TaskList();
 
         assertThrows(AssertionError.class, () -> tasks.add(null));
+        assertThrows(AssertionError.class, () -> tasks.insert(1, new Todo("task")));
+        assertThrows(AssertionError.class, () -> tasks.insert(0, null));
         assertThrows(AssertionError.class, () -> tasks.get(0));
+        assertThrows(AssertionError.class, () -> tasks.delete(0));
+        assertThrows(AssertionError.class, () -> tasks.mark(0));
+        assertThrows(AssertionError.class, () -> tasks.unmark(0));
         assertThrows(AssertionError.class, () -> tasks.find(""));
+        assertThrows(AssertionError.class, () -> tasks.containsEquivalent(null));
+        assertThrows(AssertionError.class, () -> new TaskList(null));
+        assertThrows(AssertionError.class, () -> new TaskList(
+                new ArrayList<>(java.util.Arrays.asList((Task) null))));
     }
 }

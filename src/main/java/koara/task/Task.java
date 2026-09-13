@@ -52,6 +52,15 @@ public class Task {
     }
 
     /**
+     * Returns whether this task is completed.
+     *
+     * @return True when the task is marked as done.
+     */
+    public boolean isDone() {
+        return isDone;
+    }
+
+    /**
      * Returns whether this task's description contains the specified keyword.
      *
      * @param keyword Keyword to search for.

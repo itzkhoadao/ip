@@ -1,7 +1,6 @@
 package koara.storage;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -63,10 +62,14 @@ public class Storage {
         }
 
         try {
-            for (String taskLine : Files.readAllLines(dataFilePath, StandardCharsets.UTF_8)) {
-                tasks.add(parseStoredTask(taskLine));
+            for (String taskLine : Files.readAllLines(dataFilePath)) {
+                Task task = parseStoredTask(taskLine);
+                if (tasks.stream().anyMatch(existingTask -> existingTask.hasSameDetails(task))) {
+                    throw new KoaraException(INVALID_SAVED_DATA_ERROR);
+                }
+                tasks.add(task);
             }
-        } catch (IOException exception) {
+        } catch (IOException | SecurityException exception) {
             throw new KoaraException("Alamak, Koara couldn't load your saved tasks. Your file is untouched.");
         }
         return new TaskList(tasks);
@@ -81,12 +84,8 @@ public class Storage {
     public void save(TaskList tasks) throws KoaraException {
         assert tasks != null : "Task list must not be null";
         try {
-            Path dataDirectory = dataFilePath.getParent();
-            if (dataDirectory != null) {
-                Files.createDirectories(dataDirectory);
-            }
-            Files.write(dataFilePath, tasks.toDataLines(), StandardCharsets.UTF_8);
-        } catch (IOException exception) {
+            StorageFile.writeLines(dataFilePath, tasks.toDataLines());
+        } catch (IOException | SecurityException exception) {
             throw new KoaraException("Alamak, Koara couldn't save your tasks. Please try again.");
         }
     }
@@ -150,6 +149,9 @@ public class Storage {
         }
         LocalDate startDate = parseDate(taskParts[EVENT_START_DATE_INDEX]);
         LocalDate endDate = parseDate(taskParts[EVENT_END_DATE_INDEX]);
+        if (startDate.isAfter(endDate)) {
+            throw new KoaraException(INVALID_SAVED_DATA_ERROR);
+        }
         return new Event(taskParts[TASK_DESCRIPTION_INDEX], startDate, endDate);
     }
 

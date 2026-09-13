@@ -1,5 +1,7 @@
 package koara.task;
 
+import java.util.Objects;
+
 /**
  * Represents a task with a description and completion status.
  */
@@ -58,6 +60,20 @@ public class Task {
     public boolean containsKeyword(String keyword) {
         assert keyword != null && !keyword.isBlank() : "Search keyword must not be blank";
         return description.contains(keyword);
+    }
+
+    /**
+     * Returns whether another task has the same type, description, and timing details.
+     * Completion status is deliberately ignored when detecting duplicate tasks.
+     *
+     * @param other Other task to compare.
+     * @return True when both tasks describe the same work.
+     */
+    public boolean hasSameDetails(Task other) {
+        assert other != null : "Task to compare must not be null";
+        return taskType == other.taskType
+                && description.equals(other.description)
+                && Objects.equals(additionalInformation, other.additionalInformation);
     }
 
     /**

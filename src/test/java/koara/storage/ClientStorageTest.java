@@ -50,4 +50,22 @@ public class ClientStorageTest {
 
         assertThrows(KoaraException.class, storage::load);
     }
+
+    @Test
+    public void load_duplicateClientIdentity_throwsKoaraException() throws IOException {
+        Path filePath = tempDirectory.resolve("clients.txt");
+        Files.writeString(filePath, "Alex Tan\t91234567\tRun\tHealthy\n"
+                + "Beth Lee\t91234567\tSwim\tHealthy");
+        ClientStorage storage = new ClientStorage(filePath);
+
+        assertThrows(KoaraException.class, storage::load);
+    }
+
+    @Test
+    public void save_pathIsDirectory_throwsKoaraException() throws IOException {
+        Path directoryPath = Files.createDirectory(tempDirectory.resolve("clients.txt"));
+        ClientStorage storage = new ClientStorage(directoryPath);
+
+        assertThrows(KoaraException.class, () -> storage.save(new ClientList()));
+    }
 }

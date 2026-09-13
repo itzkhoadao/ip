@@ -58,6 +58,23 @@ public class ClientList {
     }
 
     /**
+     * Returns whether a client with the same name or phone already exists.
+     *
+     * @param client Client whose identity should be checked.
+     * @param excludedIndex Existing client index to ignore, or {@code -1} when adding.
+     * @return True when another client has matching identifying information.
+     */
+    public boolean containsDuplicate(Client client, int excludedIndex) {
+        assert client != null : "Client to compare must not be null";
+        assert excludedIndex >= -1 && excludedIndex < clients.size()
+                : "Excluded client index must be -1 or within the list";
+        return java.util.stream.IntStream.range(0, clients.size())
+                .filter(index -> index != excludedIndex)
+                .mapToObj(clients::get)
+                .anyMatch(existingClient -> existingClient.hasSameIdentity(client));
+    }
+
+    /**
      * Replaces the client at the specified index.
      *
      * @param index Zero-based client index.

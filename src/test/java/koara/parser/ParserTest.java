@@ -36,6 +36,11 @@ public class ParserTest {
         assertThrows(KoaraException.class, () -> Parser.parseTask("deadline return book /by tomorrow"));
         assertThrows(KoaraException.class, () -> Parser.parseTask("event meeting /from 2019-12-02"));
         assertThrows(KoaraException.class, () -> Parser.parseTask("unknown command"));
+        assertThrows(KoaraException.class, () -> Parser.parseTask(
+                "deadline submit /by 2026-09-13 /by 2026-09-14"));
+        assertThrows(KoaraException.class, () -> Parser.parseTask(
+                "event trip /from 2026-09-14 /to 2026-09-13"));
+        assertThrows(KoaraException.class, () -> Parser.parseTask("todo read | write"));
     }
 
     @Test
@@ -55,6 +60,7 @@ public class ParserTest {
     @Test
     public void parseFindKeyword_validCommand_returnsTrimmedKeyword() throws KoaraException {
         assertEquals("read book", Parser.parseFindKeyword("find   read book  "));
+        assertEquals("client list", Parser.normalizeCommand("  client   list  "));
     }
 
     @Test
@@ -86,5 +92,9 @@ public class ParserTest {
                 "client edit 3 /name Alex /phone 91234567 /goal Run /notes Healthy", 2));
         assertThrows(KoaraException.class, () -> Parser.parseClientKeyword("client find"));
         assertThrows(KoaraException.class, () -> Parser.parseClientIndex("client delete first", "client delete", 1));
+        assertThrows(KoaraException.class, () -> Parser.parseClient(
+                "client add Alex /phone abc /goal Run /notes Healthy"));
+        assertThrows(KoaraException.class, () -> Parser.parseClient(
+                "client add Alex /phone 91234567 /phone 92345678 /goal Run /notes Healthy"));
     }
 }

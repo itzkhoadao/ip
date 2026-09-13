@@ -46,6 +46,18 @@ public class Client {
     }
 
     /**
+     * Returns whether another client has the same name or phone number.
+     *
+     * @param other Other client to compare.
+     * @return True when either identifying field matches.
+     */
+    public boolean hasSameIdentity(Client other) {
+        assert other != null : "Client to compare must not be null";
+        return name.equalsIgnoreCase(other.name)
+                || normalizePhone(phone).equals(normalizePhone(other.phone));
+    }
+
+    /**
      * Returns this client in the tab-separated storage format.
      *
      * @return Serialized client data.
@@ -66,5 +78,9 @@ public class Client {
 
     private static boolean isPresent(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private static String normalizePhone(String phone) {
+        return phone.replace(" ", "");
     }
 }

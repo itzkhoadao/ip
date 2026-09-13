@@ -1,23 +1,24 @@
 package koara.gui;
 
 import java.io.IOException;
-import java.util.Collections;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Circle;
 
 /**
  * Displays a chat message beside an image of its speaker.
  */
 public class DialogBox extends HBox {
+    private static final double USER_MESSAGE_WIDTH_RATIO = 0.72;
+    private static final double KOARA_MESSAGE_WIDTH_RATIO = 0.88;
+    private static final double AVATAR_RADIUS = 18.0;
+
     @FXML
     private Label dialogText;
 
@@ -44,18 +45,22 @@ public class DialogBox extends HBox {
         assert dialogText != null : "FXML loader must inject the dialog label";
         assert displayPicture != null : "FXML loader must inject the display picture";
         dialogText.setText(text);
-        displayPicture.setImage(image);
+        configureAvatar(image);
     }
 
     /**
      * Creates a dialog box for a message from the user.
      *
      * @param text Message to display.
-     * @param image Image representing the user.
      * @return User dialog box.
      */
-    public static DialogBox getUserDialog(String text, Image image) {
-        return new DialogBox(text, image);
+    public static DialogBox getUserDialog(String text) {
+        DialogBox dialogBox = new DialogBox(text, null);
+        dialogBox.getStyleClass().add("user-dialog");
+        dialogBox.dialogText.getStyleClass().add("user-message");
+        dialogBox.dialogText.maxWidthProperty().bind(
+                dialogBox.widthProperty().multiply(USER_MESSAGE_WIDTH_RATIO));
+        return dialogBox;
     }
 
     /**
@@ -67,18 +72,39 @@ public class DialogBox extends HBox {
      */
     public static DialogBox getKoaraDialog(String text, Image image) {
         DialogBox dialogBox = new DialogBox(text, image);
-        dialogBox.placeImageOnLeft();
+        dialogBox.configureKoaraLayout("koara-message");
         return dialogBox;
     }
 
     /**
-     * Places the speaker image on the left of the message.
+     * Creates a highlighted dialog box for an error response from Koara.
+     *
+     * @param text Error response to display.
+     * @param image Image representing Koara.
+     * @return Error dialog box.
      */
-    private void placeImageOnLeft() {
-        ObservableList<Node> children =
-                FXCollections.observableArrayList(getChildren());
-        Collections.reverse(children);
-        getChildren().setAll(children);
+    public static DialogBox getErrorDialog(String text, Image image) {
+        DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.configureKoaraLayout("error-message");
+        return dialogBox;
+    }
+
+    private void configureKoaraLayout(String messageStyleClass) {
+        getStyleClass().add("koara-dialog");
+        dialogText.getStyleClass().add(messageStyleClass);
+        dialogText.maxWidthProperty().bind(
+                widthProperty().multiply(KOARA_MESSAGE_WIDTH_RATIO));
+        getChildren().setAll(displayPicture, dialogText);
         setAlignment(Pos.TOP_LEFT);
+    }
+
+    private void configureAvatar(Image image) {
+        if (image == null) {
+            displayPicture.setManaged(false);
+            displayPicture.setVisible(false);
+            return;
+        }
+        displayPicture.setImage(image);
+        displayPicture.setClip(new Circle(AVATAR_RADIUS, AVATAR_RADIUS, AVATAR_RADIUS));
     }
 }

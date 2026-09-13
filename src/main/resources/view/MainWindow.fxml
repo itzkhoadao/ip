@@ -7,37 +7,44 @@
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane minHeight="400.0"
-            minWidth="420.0"
+            minWidth="360.0"
             prefHeight="600.0"
-            prefWidth="420.0"
+            prefWidth="460.0"
+            styleClass="app-root"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="koara.gui.MainWindow">
     <children>
         <TextField fx:id="userInput"
+                   accessibleHelp="Type a Koara command and press Enter or Send"
+                   accessibleText="Command input"
                    onAction="#handleUserInput"
-                   prefHeight="50.0"
-                   promptText="Enter a command..."
-                   AnchorPane.bottomAnchor="0.0"
-                   AnchorPane.leftAnchor="0.0"
-                   AnchorPane.rightAnchor="80.0" />
+                   prefHeight="52.0"
+                   promptText="Type a command…"
+                   styleClass="command-input"
+                   AnchorPane.bottomAnchor="12.0"
+                   AnchorPane.leftAnchor="12.0"
+                   AnchorPane.rightAnchor="86.0" />
         <Button fx:id="sendButton"
+                accessibleText="Send command"
                 mnemonicParsing="false"
                 onAction="#handleUserInput"
-                prefHeight="50.0"
-                prefWidth="80.0"
+                prefHeight="52.0"
+                prefWidth="68.0"
+                styleClass="send-button"
                 text="Send"
-                AnchorPane.bottomAnchor="0.0"
-                AnchorPane.rightAnchor="0.0" />
+                AnchorPane.bottomAnchor="12.0"
+                AnchorPane.rightAnchor="12.0" />
         <ScrollPane fx:id="scrollPane"
                     fitToWidth="true"
                     hbarPolicy="NEVER"
-                    AnchorPane.bottomAnchor="50.0"
+                    styleClass="conversation-scroll"
+                    AnchorPane.bottomAnchor="76.0"
                     AnchorPane.leftAnchor="0.0"
                     AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="0.0">
             <content>
-                <VBox fx:id="dialogContainer" />
+                <VBox fx:id="dialogContainer" fillWidth="true" styleClass="dialog-container" />
             </content>
         </ScrollPane>
     </children>

@@ -55,4 +55,16 @@ public class KoaraTest {
                 + " | Goal: Run 10 km | Notes: Recovered\nNow you have 0 clients.",
                 reloadedKoara.getResponse("client delete 1"));
     }
+
+    @Test
+    public void getCommandResult_validAndInvalidCommands_reportsOutcome() {
+        Koara koara = new Koara(tempDirectory.resolve("koara.txt"));
+
+        Koara.CommandResult successfulResult = koara.getCommandResult("todo read book");
+        Koara.CommandResult errorResult = koara.getCommandResult("mark 99");
+
+        assertEquals(false, successfulResult.isError());
+        assertEquals(true, errorResult.isError());
+        assertEquals("Are you crazy!!! That task number does not exist.", errorResult.message());
+    }
 }

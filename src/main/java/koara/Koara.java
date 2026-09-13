@@ -87,7 +87,7 @@ public class Koara {
                 ui.showLine();
             }
             while (ui.hasNextCommand()) {
-                String command = ui.readCommand();
+                String command = Parser.normalizeCommand(ui.readCommand());
                 ui.showLine();
                 ui.showResponse(getResponse(command));
                 ui.showLine();
@@ -125,13 +125,14 @@ public class Koara {
      */
     public CommandResult getCommandResult(String command) {
         assert command != null : "Command must not be null";
-        if (command.equals(EXIT_COMMAND)) {
+        String normalizedCommand = Parser.normalizeCommand(command);
+        if (normalizedCommand.equals(EXIT_COMMAND)) {
             return new CommandResult(
                     "See ya later! Koara is always here for you—go get that W.", false);
         }
 
         try {
-            return new CommandResult(executeCommand(command), false);
+            return new CommandResult(executeCommand(normalizedCommand), false);
         } catch (KoaraException exception) {
             return new CommandResult(exception.getMessage(), true);
         }
@@ -219,6 +220,9 @@ public class Koara {
 
     private String addTask(String command) throws KoaraException {
         Task task = Parser.parseTask(command);
+        if (tasks.containsEquivalent(task)) {
+            throw new KoaraException("That task is already on the board—no need to double-book it.");
+        }
         tasks.add(task);
         storage.save(tasks);
         return "Ayo, locked in! Added this task:\n  " + task
@@ -227,6 +231,9 @@ public class Koara {
 
     private String addClient(String command) throws KoaraException {
         Client client = Parser.parseClient(command);
+        if (clients.containsDuplicate(client, -1)) {
+            throw new KoaraException("That client name or phone number is already in your lineup.");
+        }
         clients.add(client);
         clientStorage.save(clients);
         return "Ayo, client locked in:\n  " + client
@@ -235,6 +242,9 @@ public class Koara {
 
     private String editClient(String command) throws KoaraException {
         ClientEdit clientEdit = Parser.parseClientEdit(command, clients.getSize());
+        if (clients.containsDuplicate(clientEdit.client(), clientEdit.clientIndex())) {
+            throw new KoaraException("That client name or phone number already belongs to someone else.");
+        }
         clients.update(clientEdit.clientIndex(), clientEdit.client());
         clientStorage.save(clients);
         return "Glow-up complete—updated this client:\n  " + clientEdit.client();

@@ -1,7 +1,6 @@
 package koara.storage;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -44,10 +43,14 @@ public class ClientStorage {
         }
 
         try {
-            for (String clientLine : Files.readAllLines(dataFilePath, StandardCharsets.UTF_8)) {
-                clients.add(parseStoredClient(clientLine));
+            for (String clientLine : Files.readAllLines(dataFilePath)) {
+                Client client = parseStoredClient(clientLine);
+                if (clients.stream().anyMatch(existingClient -> existingClient.hasSameIdentity(client))) {
+                    throw new KoaraException(INVALID_DATA_ERROR);
+                }
+                clients.add(client);
             }
-        } catch (IOException exception) {
+        } catch (IOException | SecurityException exception) {
             throw new KoaraException("Alamak, Koara couldn't load your saved clients. Your file is untouched.");
         }
         return new ClientList(clients);
@@ -62,12 +65,8 @@ public class ClientStorage {
     public void save(ClientList clients) throws KoaraException {
         assert clients != null : "Client list must not be null";
         try {
-            Path dataDirectory = dataFilePath.getParent();
-            if (dataDirectory != null) {
-                Files.createDirectories(dataDirectory);
-            }
-            Files.write(dataFilePath, clients.toDataLines(), StandardCharsets.UTF_8);
-        } catch (IOException exception) {
+            StorageFile.writeLines(dataFilePath, clients.toDataLines());
+        } catch (IOException | SecurityException exception) {
             throw new KoaraException("Alamak, Koara couldn't save your clients. Please try again.");
         }
     }

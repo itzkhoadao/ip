@@ -1,6 +1,8 @@
 package koara;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 
@@ -72,5 +74,32 @@ public class KoaraTest {
         assertEquals(true, unknownResult.isError());
         assertEquals("Walao, Koara catch no ball. Try todo, deadline, event, list, find, "
                 + "or a client command.", unknownResult.message());
+    }
+
+    @Test
+    public void getCommandResult_whitespaceAndDuplicateTask_handlesWithoutCorruptingList() {
+        Koara koara = new Koara(tempDirectory.resolve("koara.txt"));
+
+        Koara.CommandResult spacedResult = koara.getCommandResult("  todo   read   book  ");
+        Koara.CommandResult duplicateResult = koara.getCommandResult("todo read book");
+
+        assertFalse(spacedResult.isError());
+        assertTrue(duplicateResult.isError());
+        assertEquals("Your game plan—steady lah:\n1.[T][ ] read book", koara.getResponse(" list "));
+    }
+
+    @Test
+    public void getCommandResult_invalidDataAndDuplicateClient_reportsErrors() {
+        Koara koara = new Koara(tempDirectory.resolve("koara.txt"));
+
+        assertTrue(koara.getCommandResult(
+                "event trip /from 2026-09-14 /to 2026-09-13").isError());
+        assertTrue(koara.getCommandResult("todo review | notes").isError());
+        assertTrue(koara.getCommandResult(
+                "client add Alex /phone abc /goal Run /notes Healthy").isError());
+        assertFalse(koara.getCommandResult(
+                "client add Alex /phone 91234567 /goal Run /notes Healthy").isError());
+        assertTrue(koara.getCommandResult(
+                "client add Beth /phone 91234567 /goal Swim /notes Healthy").isError());
     }
 }

@@ -29,10 +29,23 @@ public class Parser {
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
     private static final String TO_SEPARATOR = " /to ";
+    private static final String PHONE_PATTERN = "\\+?[0-9 ]{7,16}";
+    private static final String STORAGE_SEPARATOR = "|";
     private static final String DATE_FORMAT_ERROR =
             "Alamak, that date is not it. Use yyyy-MM-dd, for example 2026-09-13.";
 
     private Parser() {
+    }
+
+    /**
+     * Removes surrounding whitespace and collapses internal whitespace between command parts.
+     *
+     * @param command Raw command entered by the user.
+     * @return Normalized command.
+     */
+    public static String normalizeCommand(String command) {
+        assert command != null : "Command must not be null";
+        return command.strip().replaceAll("\\s+", " ");
     }
 
     /**
@@ -45,7 +58,8 @@ public class Parser {
     public static boolean matchesCommand(String command, String keyword) {
         assert command != null : "Command must not be null";
         assert keyword != null && !keyword.isBlank() : "Command keyword must not be blank";
-        return command.equals(keyword) || command.startsWith(keyword + " ");
+        String normalizedCommand = normalizeCommand(command);
+        return normalizedCommand.equals(keyword) || normalizedCommand.startsWith(keyword + " ");
     }
 
     /**
@@ -57,14 +71,15 @@ public class Parser {
      */
     public static Task parseTask(String command) throws KoaraException {
         assert command != null : "Command must not be null";
-        if (matchesCommand(command, TODO_COMMAND)) {
-            return parseTodo(command);
+        String normalizedCommand = normalizeCommand(command);
+        if (matchesCommand(normalizedCommand, TODO_COMMAND)) {
+            return parseTodo(normalizedCommand);
         }
-        if (matchesCommand(command, DEADLINE_COMMAND)) {
-            return parseDeadline(command);
+        if (matchesCommand(normalizedCommand, DEADLINE_COMMAND)) {
+            return parseDeadline(normalizedCommand);
         }
-        if (matchesCommand(command, EVENT_COMMAND)) {
-            return parseEvent(command);
+        if (matchesCommand(normalizedCommand, EVENT_COMMAND)) {
+            return parseEvent(normalizedCommand);
         }
         throw new KoaraException("Walao, Koara catch no ball. Try todo, deadline, event, list, find, "
                 + "or a client command.");
@@ -75,6 +90,7 @@ public class Parser {
         if (description.isEmpty()) {
             throw new KoaraException("Alamak, a todo cannot be blank lah. Add a description after todo.");
         }
+        validateTaskDescription(description);
         return new Todo(description);
     }
 
@@ -85,7 +101,7 @@ public class Parser {
         }
 
         int bySeparatorIndex = taskDetails.indexOf(BY_SEPARATOR);
-        if (bySeparatorIndex < 0) {
+        if (countOccurrences(taskDetails, BY_SEPARATOR) != 1) {
             throw new KoaraException("Almost there! Add /by and a date to that deadline.");
         }
 
@@ -94,6 +110,7 @@ public class Parser {
         if (dueDateText.isEmpty()) {
             throw new KoaraException("Almost there! Put a date after /by for that deadline.");
         }
+        validateTaskDescription(description);
         return new Deadline(description, parseDate(dueDateText));
     }
 
@@ -102,13 +119,13 @@ public class Parser {
         validateEventDescription(taskDetails);
 
         int fromSeparatorIndex = taskDetails.indexOf(FROM_SEPARATOR);
-        if (fromSeparatorIndex < 0) {
+        if (countOccurrences(taskDetails, FROM_SEPARATOR) != 1) {
             throw new KoaraException("Almost there! An event needs both /from and /to dates.");
         }
 
         int toSeparatorIndex = taskDetails.indexOf(TO_SEPARATOR,
                 fromSeparatorIndex + FROM_SEPARATOR.length());
-        if (toSeparatorIndex < 0) {
+        if (countOccurrences(taskDetails, TO_SEPARATOR) != 1 || toSeparatorIndex < fromSeparatorIndex) {
             throw new KoaraException("Almost there! Add /to and an end date for that event.");
         }
 
@@ -119,7 +136,13 @@ public class Parser {
         if (startDateText.isEmpty() || endDateText.isEmpty()) {
             throw new KoaraException("Alamak, both event dates must be filled in. Try again—you got this.");
         }
-        return new Event(description, parseDate(startDateText), parseDate(endDateText));
+        validateTaskDescription(description);
+        LocalDate startDate = parseDate(startDateText);
+        LocalDate endDate = parseDate(endDateText);
+        if (startDate.isAfter(endDate)) {
+            throw new KoaraException("Alamak, an event cannot end before it starts.");
+        }
+        return new Event(description, startDate, endDate);
     }
 
     private static void validateEventDescription(String taskDetails) throws KoaraException {
@@ -148,7 +171,8 @@ public class Parser {
         assert action != null && !action.isBlank() : "Task action must not be blank";
         assert matchesCommand(command, action) : "Command must match the task action";
         assert taskCount >= 0 : "Task count must not be negative";
-        String taskNumberText = command.substring(action.length()).trim();
+        String normalizedCommand = normalizeCommand(command);
+        String taskNumberText = normalizedCommand.substring(action.length()).trim();
         if (taskNumberText.isEmpty()) {
             throw new KoaraException("Almost there! Tell Koara which task number to " + action + ".");
         }
@@ -175,7 +199,8 @@ public class Parser {
      */
     public static String parseFindKeyword(String command) throws KoaraException {
         assert matchesCommand(command, FIND_COMMAND) : "Command must be a find command";
-        String keyword = command.substring(FIND_COMMAND.length()).trim();
+        String normalizedCommand = normalizeCommand(command);
+        String keyword = normalizedCommand.substring(FIND_COMMAND.length()).trim();
         if (keyword.isEmpty()) {
             throw new KoaraException("Koara needs a keyword to search. Add one after find.");
         }
@@ -191,7 +216,8 @@ public class Parser {
      */
     public static Client parseClient(String command) throws KoaraException {
         assert matchesCommand(command, CLIENT_ADD_COMMAND) : "Command must add a client";
-        String details = command.substring(CLIENT_ADD_COMMAND.length()).trim();
+        String normalizedCommand = normalizeCommand(command);
+        String details = normalizedCommand.substring(CLIENT_ADD_COMMAND.length()).trim();
         return parseClientDetails(details, false);
     }
 
@@ -205,13 +231,14 @@ public class Parser {
      */
     public static ClientEdit parseClientEdit(String command, int clientCount) throws KoaraException {
         assert matchesCommand(command, CLIENT_EDIT_COMMAND) : "Command must edit a client";
-        int nameSeparatorIndex = command.indexOf(NAME_SEPARATOR);
-        if (nameSeparatorIndex < 0) {
+        String normalizedCommand = normalizeCommand(command);
+        int nameSeparatorIndex = normalizedCommand.indexOf(NAME_SEPARATOR);
+        if (countOccurrences(normalizedCommand, NAME_SEPARATOR) != 1) {
             throw clientFormatException(CLIENT_EDIT_COMMAND + " INDEX /name");
         }
-        String indexCommand = command.substring(0, nameSeparatorIndex);
+        String indexCommand = normalizedCommand.substring(0, nameSeparatorIndex);
         int clientIndex = parseClientIndex(indexCommand, CLIENT_EDIT_COMMAND, clientCount);
-        String details = command.substring(nameSeparatorIndex + 1);
+        String details = normalizedCommand.substring(nameSeparatorIndex + 1);
         return new ClientEdit(clientIndex, parseClientDetails(details, true));
     }
 
@@ -224,7 +251,8 @@ public class Parser {
      */
     public static String parseClientKeyword(String command) throws KoaraException {
         assert matchesCommand(command, CLIENT_FIND_COMMAND) : "Command must find clients";
-        String keyword = command.substring(CLIENT_FIND_COMMAND.length()).trim();
+        String normalizedCommand = normalizeCommand(command);
+        String keyword = normalizedCommand.substring(CLIENT_FIND_COMMAND.length()).trim();
         if (keyword.isEmpty()) {
             throw new KoaraException("Koara needs some client info to search. Add it after client find.");
         }
@@ -243,7 +271,8 @@ public class Parser {
     public static int parseClientIndex(String command, String action, int clientCount) throws KoaraException {
         assert matchesCommand(command, action) : "Command must match the client action";
         assert clientCount >= 0 : "Client count must not be negative";
-        String clientNumberText = command.substring(action.length()).trim();
+        String normalizedCommand = normalizeCommand(command);
+        String clientNumberText = normalizedCommand.substring(action.length()).trim();
         if (clientNumberText.isEmpty()) {
             throw new KoaraException("Almost there! Tell Koara which client number to "
                     + action.substring("client ".length()) + ".");
@@ -266,8 +295,11 @@ public class Parser {
         int phoneIndex = normalizedDetails.indexOf(PHONE_SEPARATOR);
         int goalIndex = normalizedDetails.indexOf(GOAL_SEPARATOR);
         int notesIndex = normalizedDetails.indexOf(NOTES_SEPARATOR);
+        boolean hasRepeatedField = countOccurrences(normalizedDetails, PHONE_SEPARATOR) != 1
+                || countOccurrences(normalizedDetails, GOAL_SEPARATOR) != 1
+                || countOccurrences(normalizedDetails, NOTES_SEPARATOR) != 1;
         boolean hasInvalidOrder = phoneIndex < 0 || goalIndex < phoneIndex || notesIndex < goalIndex;
-        if (hasInvalidOrder) {
+        if (hasRepeatedField || hasInvalidOrder) {
             throw clientFormatException(CLIENT_ADD_COMMAND);
         }
 
@@ -278,6 +310,9 @@ public class Parser {
         String notes = normalizedDetails.substring(notesIndex + NOTES_SEPARATOR.length()).trim();
         if (name.isEmpty() || phone.isEmpty() || goal.isEmpty() || notes.isEmpty()) {
             throw clientFormatException(CLIENT_ADD_COMMAND);
+        }
+        if (!phone.matches(PHONE_PATTERN)) {
+            throw new KoaraException("That phone number does not look valid. Use 7–16 digits with an optional +.");
         }
         if (containsUnsupportedCharacter(name, phone, goal, notes)) {
             throw new KoaraException("Keep each client detail on one line—tabs and line breaks are not supported.");
@@ -292,6 +327,22 @@ public class Parser {
             }
         }
         return false;
+    }
+
+    private static int countOccurrences(String text, String token) {
+        int count = 0;
+        int searchIndex = 0;
+        while ((searchIndex = text.indexOf(token, searchIndex)) >= 0) {
+            count++;
+            searchIndex += token.length();
+        }
+        return count;
+    }
+
+    private static void validateTaskDescription(String description) throws KoaraException {
+        if (description.contains(STORAGE_SEPARATOR)) {
+            throw new KoaraException("Task descriptions cannot contain the | character.");
+        }
     }
 
     private static KoaraException clientFormatException(String command) {

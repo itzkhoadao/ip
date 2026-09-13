@@ -62,4 +62,24 @@ public class StorageTest {
 
         assertThrows(KoaraException.class, storage::load);
     }
+
+    @Test
+    public void load_duplicateOrReversedEventData_throwsKoaraException() throws IOException {
+        Path filePath = tempDirectory.resolve("koara.txt");
+        Storage storage = new Storage(filePath);
+
+        Files.writeString(filePath, "T | 0 | read book\nT | 1 | read book");
+        assertThrows(KoaraException.class, storage::load);
+
+        Files.writeString(filePath, "E | 0 | trip | 2026-09-14 | 2026-09-13");
+        assertThrows(KoaraException.class, storage::load);
+    }
+
+    @Test
+    public void save_pathIsDirectory_throwsKoaraException() throws IOException {
+        Path directoryPath = Files.createDirectory(tempDirectory.resolve("koara.txt"));
+        Storage storage = new Storage(directoryPath);
+
+        assertThrows(KoaraException.class, () -> storage.save(new TaskList()));
+    }
 }

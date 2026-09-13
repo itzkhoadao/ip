@@ -29,7 +29,8 @@ public class Parser {
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
     private static final String TO_SEPARATOR = " /to ";
-    private static final String DATE_FORMAT_ERROR = "Wrong date format!!! Please use yyyy-MM-dd.";
+    private static final String DATE_FORMAT_ERROR =
+            "Alamak, that date is not it. Use yyyy-MM-dd, for example 2026-09-13.";
 
     private Parser() {
     }
@@ -65,14 +66,14 @@ public class Parser {
         if (matchesCommand(command, EVENT_COMMAND)) {
             return parseEvent(command);
         }
-        throw new KoaraException("What is that bro!!! Sorry ah, I don't know what that means :-(");
+        throw new KoaraException("Walao, Koara catch no ball. Try todo, deadline, event, list, find, "
+                + "or a client command.");
     }
 
     private static Todo parseTodo(String command) throws KoaraException {
         String description = extractTaskDetails(command, TODO_COMMAND);
         if (description.isEmpty()) {
-            throw new KoaraException("Unlucky!!! The description of a todo task cannot be empty. "
-                    + "Try typing something more.");
+            throw new KoaraException("Alamak, a todo cannot be blank lah. Add a description after todo.");
         }
         return new Todo(description);
     }
@@ -80,19 +81,18 @@ public class Parser {
     private static Deadline parseDeadline(String command) throws KoaraException {
         String taskDetails = extractTaskDetails(command, DEADLINE_COMMAND);
         if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
-            throw new KoaraException("Error error!!! The description of a deadline task cannot be empty. "
-                    + "Try typing something more.");
+            throw new KoaraException("Alamak, a deadline needs a description. Add it after deadline.");
         }
 
         int bySeparatorIndex = taskDetails.indexOf(BY_SEPARATOR);
         if (bySeparatorIndex < 0) {
-            throw new KoaraException("Sorry, this cannot!!! A deadline task needs a /by date or time.");
+            throw new KoaraException("Almost there! Add /by and a date to that deadline.");
         }
 
         String description = taskDetails.substring(0, bySeparatorIndex).trim();
         String dueDateText = taskDetails.substring(bySeparatorIndex + BY_SEPARATOR.length()).trim();
         if (dueDateText.isEmpty()) {
-            throw new KoaraException("Sorry, cannot bro!!! A deadline task needs a /by date or time.");
+            throw new KoaraException("Almost there! Put a date after /by for that deadline.");
         }
         return new Deadline(description, parseDate(dueDateText));
     }
@@ -103,13 +103,13 @@ public class Parser {
 
         int fromSeparatorIndex = taskDetails.indexOf(FROM_SEPARATOR);
         if (fromSeparatorIndex < 0) {
-            throw new KoaraException("This cannot ah!!! An event task needs /from and /to dates or times.");
+            throw new KoaraException("Almost there! An event needs both /from and /to dates.");
         }
 
         int toSeparatorIndex = taskDetails.indexOf(TO_SEPARATOR,
                 fromSeparatorIndex + FROM_SEPARATOR.length());
         if (toSeparatorIndex < 0) {
-            throw new KoaraException("Retry retry!!! An event task needs /from and /to dates or times.");
+            throw new KoaraException("Almost there! Add /to and an end date for that event.");
         }
 
         String description = taskDetails.substring(0, fromSeparatorIndex).trim();
@@ -117,7 +117,7 @@ public class Parser {
                 fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex).trim();
         String endDateText = taskDetails.substring(toSeparatorIndex + TO_SEPARATOR.length()).trim();
         if (startDateText.isEmpty() || endDateText.isEmpty()) {
-            throw new KoaraException("Wrong input!!! An event task needs /from and /to dates or times.");
+            throw new KoaraException("Alamak, both event dates must be filled in. Try again—you got this.");
         }
         return new Event(description, parseDate(startDateText), parseDate(endDateText));
     }
@@ -127,8 +127,7 @@ public class Parser {
                 || taskDetails.startsWith("/from")
                 || taskDetails.startsWith("/to");
         if (hasNoDescription) {
-            throw new KoaraException("Your bad!!! The description of an event task cannot be empty. "
-                    + "Try typing something more.");
+            throw new KoaraException("Alamak, an event needs a description before its dates.");
         }
     }
 
@@ -151,19 +150,18 @@ public class Parser {
         assert taskCount >= 0 : "Task count must not be negative";
         String taskNumberText = command.substring(action.length()).trim();
         if (taskNumberText.isEmpty()) {
-            throw new KoaraException("Sorry for the inconvenience!!! Please specify a task number to "
-                    + action + ".");
+            throw new KoaraException("Almost there! Tell Koara which task number to " + action + ".");
         }
 
         int taskNumber;
         try {
             taskNumber = Integer.parseInt(taskNumberText);
         } catch (NumberFormatException exception) {
-            throw new KoaraException("OOPS!!! The task number must be a whole number.");
+            throw new KoaraException("Alamak, the task number must be a whole number.");
         }
 
         if (taskNumber < 1 || taskNumber > taskCount) {
-            throw new KoaraException("Are you crazy!!! That task number does not exist.");
+            throw new KoaraException("That task number is not on the board yet. Check list and try again.");
         }
         return taskNumber - 1;
     }
@@ -179,7 +177,7 @@ public class Parser {
         assert matchesCommand(command, FIND_COMMAND) : "Command must be a find command";
         String keyword = command.substring(FIND_COMMAND.length()).trim();
         if (keyword.isEmpty()) {
-            throw new KoaraException("Oops!!! Please specify a keyword to find.");
+            throw new KoaraException("Koara needs a keyword to search. Add one after find.");
         }
         return keyword;
     }
@@ -228,7 +226,7 @@ public class Parser {
         assert matchesCommand(command, CLIENT_FIND_COMMAND) : "Command must find clients";
         String keyword = command.substring(CLIENT_FIND_COMMAND.length()).trim();
         if (keyword.isEmpty()) {
-            throw new KoaraException("Please specify client information to find.");
+            throw new KoaraException("Koara needs some client info to search. Add it after client find.");
         }
         return keyword;
     }
@@ -247,17 +245,18 @@ public class Parser {
         assert clientCount >= 0 : "Client count must not be negative";
         String clientNumberText = command.substring(action.length()).trim();
         if (clientNumberText.isEmpty()) {
-            throw new KoaraException("Please specify a client number to " + action.substring("client ".length()) + ".");
+            throw new KoaraException("Almost there! Tell Koara which client number to "
+                    + action.substring("client ".length()) + ".");
         }
 
         int clientNumber;
         try {
             clientNumber = Integer.parseInt(clientNumberText);
         } catch (NumberFormatException exception) {
-            throw new KoaraException("The client number must be a whole number.");
+            throw new KoaraException("Alamak, the client number must be a whole number.");
         }
         if (clientNumber < 1 || clientNumber > clientCount) {
-            throw new KoaraException("That client number does not exist.");
+            throw new KoaraException("That client number is not on the board yet. Check client list and try again.");
         }
         return clientNumber - 1;
     }
@@ -281,7 +280,7 @@ public class Parser {
             throw clientFormatException(CLIENT_ADD_COMMAND);
         }
         if (containsUnsupportedCharacter(name, phone, goal, notes)) {
-            throw new KoaraException("Client details cannot contain tabs or line breaks.");
+            throw new KoaraException("Keep each client detail on one line—tabs and line breaks are not supported.");
         }
         return new Client(name, phone, goal, notes);
     }
@@ -296,7 +295,7 @@ public class Parser {
     }
 
     private static KoaraException clientFormatException(String command) {
-        return new KoaraException("Use: " + command
+        return new KoaraException("Almost there! Use: " + command
                 + " NAME /phone PHONE /goal GOAL /notes NOTES");
     }
 

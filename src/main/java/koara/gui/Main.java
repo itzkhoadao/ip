@@ -6,6 +6,7 @@ import java.util.Objects;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import koara.Koara;
@@ -39,7 +40,10 @@ public class Main extends Application {
                     Main.class.getResource("/css/main.css"),
                     "Missing GUI stylesheet").toExternalForm());
             stage.setScene(scene);
-            stage.setTitle("Koara");
+            stage.getIcons().add(new Image(Objects.requireNonNull(
+                    Main.class.getResourceAsStream("/images/DaKoara.png"),
+                    "Missing Koara app icon")));
+            stage.setTitle("KOARA — Steady Mode");
             stage.setMinHeight(MINIMUM_WINDOW_HEIGHT);
             stage.setMinWidth(MINIMUM_WINDOW_WIDTH);
             stage.show();

@@ -22,7 +22,8 @@ public class MainWindow extends AnchorPane {
     private static final double SCROLL_BOTTOM_POSITION = 1.0;
     private static final Duration EXIT_DELAY = Duration.seconds(1);
     private static final String WELCOME_MESSAGE =
-            "Hello! I'm Koara.\nWhat can I do for you?";
+            "Wassup! Koara here—your steady productivity sidekick.\n"
+                    + "Drop me a task and let's lock in.";
 
     private final Image koaraImage = loadImage("/images/DaKoara.png");
 
@@ -73,7 +74,7 @@ public class MainWindow extends AnchorPane {
         assert koara != null : "Koara must be set before processing input";
         String input = userInput.getText().trim();
         if (input.isEmpty()) {
-            addErrorDialog("Please enter a command before sending.");
+            addErrorDialog("Alamak, the command box is empty. Type something and we go again!");
             return;
         }
 

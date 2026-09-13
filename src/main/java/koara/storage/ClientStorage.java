@@ -16,7 +16,8 @@ import koara.exception.KoaraException;
 public class ClientStorage {
     private static final String FIELD_SEPARATOR = "\t";
     private static final int CLIENT_FIELD_COUNT = 4;
-    private static final String INVALID_DATA_ERROR = "Sorry, the saved client data is invalid.";
+    private static final String INVALID_DATA_ERROR =
+            "Walao, Koara found invalid saved client data and could not load it safely.";
 
     private final Path dataFilePath;
 
@@ -47,7 +48,7 @@ public class ClientStorage {
                 clients.add(parseStoredClient(clientLine));
             }
         } catch (IOException exception) {
-            throw new KoaraException("Sorry, I couldn't load your saved clients.");
+            throw new KoaraException("Alamak, Koara couldn't load your saved clients. Your file is untouched.");
         }
         return new ClientList(clients);
     }
@@ -67,7 +68,7 @@ public class ClientStorage {
             }
             Files.write(dataFilePath, clients.toDataLines(), StandardCharsets.UTF_8);
         } catch (IOException exception) {
-            throw new KoaraException("Sorry, I couldn't save your clients.");
+            throw new KoaraException("Alamak, Koara couldn't save your clients. Please try again.");
         }
     }
 

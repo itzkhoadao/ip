@@ -25,7 +25,8 @@ public class Storage {
     private static final String EVENT_TYPE = "E";
     private static final String INCOMPLETE_STATUS = "0";
     private static final String COMPLETE_STATUS = "1";
-    private static final String INVALID_SAVED_DATA_ERROR = "Sorry, the saved task data is invalid.";
+    private static final String INVALID_SAVED_DATA_ERROR =
+            "Walao, Koara found invalid saved task data and could not load it safely.";
     private static final int TASK_TYPE_INDEX = 0;
     private static final int TASK_STATUS_INDEX = 1;
     private static final int TASK_DESCRIPTION_INDEX = 2;
@@ -66,7 +67,7 @@ public class Storage {
                 tasks.add(parseStoredTask(taskLine));
             }
         } catch (IOException exception) {
-            throw new KoaraException("Sorry, I couldn't load your saved tasks.");
+            throw new KoaraException("Alamak, Koara couldn't load your saved tasks. Your file is untouched.");
         }
         return new TaskList(tasks);
     }
@@ -86,7 +87,7 @@ public class Storage {
             }
             Files.write(dataFilePath, tasks.toDataLines(), StandardCharsets.UTF_8);
         } catch (IOException exception) {
-            throw new KoaraException("Sorry, I couldn't save your tasks.");
+            throw new KoaraException("Alamak, Koara couldn't save your tasks. Please try again.");
         }
     }
 

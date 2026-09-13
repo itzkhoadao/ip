@@ -58,6 +58,18 @@ public class ClientList {
     }
 
     /**
+     * Inserts a client at a specified zero-based index.
+     *
+     * @param index Position at which to insert the client.
+     * @param client Client to insert.
+     */
+    public void insert(int index, Client client) {
+        assert index >= 0 && index <= clients.size() : "Client insertion index must be within the list";
+        assert client != null : "Client to insert must not be null";
+        clients.add(index, client);
+    }
+
+    /**
      * Returns whether a client with the same name or phone already exists.
      *
      * @param client Client whose identity should be checked.

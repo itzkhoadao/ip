@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -101,5 +103,95 @@ public class KoaraTest {
                 "client add Alex /phone 91234567 /goal Run /notes Healthy").isError());
         assertTrue(koara.getCommandResult(
                 "client add Beth /phone 91234567 /goal Swim /notes Healthy").isError());
+    }
+
+    @Test
+    public void getResponse_deadlineEventAndEmptyLists_routesAllCommandTypes() {
+        Koara koara = new Koara(tempDirectory.resolve("koara.txt"));
+
+        assertEquals("Your game plan—steady lah:", koara.getResponse("list"));
+        assertEquals("Your client lineup—steady lah:", koara.getResponse("client list"));
+        assertFalse(koara.getCommandResult("deadline submit /by 2026-09-13").isError());
+        assertFalse(koara.getCommandResult(
+                "event workshop /from 2026-09-13 /to 2026-09-14").isError());
+        assertTrue(koara.getCommandResult("find missing").message().endsWith("lineup:"));
+    }
+
+    @Test
+    public void constructor_invalidSavedFiles_combinesStartupErrors() throws IOException {
+        Path taskFile = tempDirectory.resolve("koara.txt");
+        Path clientFile = tempDirectory.resolve("clients.txt");
+        Files.writeString(taskFile, "invalid");
+        Files.writeString(clientFile, "invalid");
+
+        Koara koara = new Koara(taskFile);
+        String startupError = koara.getStartupError().orElseThrow();
+
+        assertTrue(startupError.contains("saved task data"));
+        assertTrue(startupError.contains("saved client data"));
+        assertEquals("Your game plan—steady lah:", koara.getResponse("list"));
+        assertEquals("Your client lineup—steady lah:", koara.getResponse("client list"));
+    }
+
+    @Test
+    public void failedTaskSave_rollsBackInMemoryAddition() throws IOException {
+        Path taskPath = Files.createDirectory(tempDirectory.resolve("koara.txt"));
+        Koara koara = new Koara(taskPath);
+
+        Koara.CommandResult result = koara.getCommandResult("todo read book");
+
+        assertTrue(result.isError());
+        assertEquals("Your game plan—steady lah:", koara.getResponse("list"));
+    }
+
+    @Test
+    public void failedClientSave_rollsBackInMemoryAddition() throws IOException {
+        Files.createDirectory(tempDirectory.resolve("clients.txt"));
+        Koara koara = new Koara(tempDirectory.resolve("koara.txt"));
+
+        Koara.CommandResult result = koara.getCommandResult(
+                "client add Alex /phone 91234567 /goal Run /notes Healthy");
+
+        assertTrue(result.isError());
+        assertEquals("Your client lineup—steady lah:", koara.getResponse("client list"));
+    }
+
+    @Test
+    public void failedTaskUpdates_restorePreviousStatusAndOrder() throws IOException {
+        Path taskPath = tempDirectory.resolve("koara.txt");
+        Koara koara = new Koara(taskPath);
+        koara.getResponse("todo first");
+        koara.getResponse("todo second");
+        Files.delete(taskPath);
+        Files.createDirectory(taskPath);
+
+        assertTrue(koara.getCommandResult("mark 1").isError());
+        assertTrue(koara.getCommandResult("delete 1").isError());
+        assertEquals("Your game plan—steady lah:\n1.[T][ ] first\n2.[T][ ] second",
+                koara.getResponse("list"));
+    }
+
+    @Test
+    public void failedClientUpdates_restorePreviousDetailsAndOrder() throws IOException {
+        Path taskPath = tempDirectory.resolve("koara.txt");
+        Path clientPath = tempDirectory.resolve("clients.txt");
+        Koara koara = new Koara(taskPath);
+        koara.getResponse("client add Alex /phone 91234567 /goal Run /notes Healthy");
+        koara.getResponse("client add Beth /phone 92345678 /goal Swim /notes Healthy");
+        Files.delete(clientPath);
+        Files.createDirectory(clientPath);
+
+        assertTrue(koara.getCommandResult(
+                "client edit 1 /name Chris /phone 93456789 /goal Cycle /notes Healthy").isError());
+        assertTrue(koara.getCommandResult("client delete 1").isError());
+        assertEquals("Your client lineup—steady lah:\n"
+                + "1. Alex | Phone: 91234567 | Goal: Run | Notes: Healthy\n"
+                + "2. Beth | Phone: 92345678 | Goal: Swim | Notes: Healthy",
+                koara.getResponse("client list"));
+    }
+
+    @Test
+    public void constructor_nullPath_throwsAssertionError() {
+        org.junit.jupiter.api.Assertions.assertThrows(AssertionError.class, () -> new Koara(null));
     }
 }

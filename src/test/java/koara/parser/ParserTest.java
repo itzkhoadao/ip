@@ -122,6 +122,8 @@ public class ParserTest {
         assertThrows(KoaraException.class, () -> Parser.parseClient(
                 "client add Alex /phone abc /goal Run /notes Healthy"));
         assertThrows(KoaraException.class, () -> Parser.parseClient(
+                "client add Alex /phone 1 2 3 4 /goal Run /notes Healthy"));
+        assertThrows(KoaraException.class, () -> Parser.parseClient(
                 "client add Alex /phone 91234567 /phone 92345678 /goal Run /notes Healthy"));
         assertThrows(KoaraException.class, () -> Parser.parseClient(
                 "client add Alex /goal Run /phone 91234567 /notes Healthy"));

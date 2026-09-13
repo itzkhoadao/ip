@@ -82,6 +82,9 @@ public class ClientStorage {
                 throw new KoaraException(INVALID_DATA_ERROR);
             }
         }
+        if (!Client.isValidPhone(fields[1])) {
+            throw new KoaraException(INVALID_DATA_ERROR);
+        }
         return new Client(fields[0], fields[1], fields[2], fields[3]);
     }
 }

@@ -6,6 +6,8 @@ import java.util.Locale;
  * Represents a gym client and the information needed by a trainer.
  */
 public class Client {
+    private static final String PHONE_PATTERN = "\\+?[0-9]{7,16}";
+
     private final String name;
     private final String phone;
     private final String goal;
@@ -22,6 +24,7 @@ public class Client {
     public Client(String name, String phone, String goal, String notes) {
         assert isPresent(name) : "Client name must not be blank";
         assert isPresent(phone) : "Client phone must not be blank";
+        assert isValidPhone(phone) : "Client phone must contain 7–16 digits with an optional +";
         assert isPresent(goal) : "Client goal must not be blank";
         assert isPresent(notes) : "Client notes must not be blank";
         this.name = name;
@@ -55,6 +58,17 @@ public class Client {
         assert other != null : "Client to compare must not be null";
         return name.equalsIgnoreCase(other.name)
                 || normalizePhone(phone).equals(normalizePhone(other.phone));
+    }
+
+    /**
+     * Returns whether a phone number has an optional leading {@code +} and 7–16 digits.
+     * Spaces used to group the digits are ignored.
+     *
+     * @param phone Phone number to validate.
+     * @return True when the phone number uses the supported format.
+     */
+    public static boolean isValidPhone(String phone) {
+        return isPresent(phone) && normalizePhone(phone).matches(PHONE_PATTERN);
     }
 
     /**

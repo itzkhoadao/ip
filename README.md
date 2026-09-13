@@ -1,85 +1,36 @@
 # Koara
 
-Koara is a personal assistant chatbot built incrementally as part of the CS2103T individual project. At Level 6, Koara can track todos, deadlines, and events, display their completion status, mark, unmark, or delete them, and report invalid commands without ending the session. Given below are instructions on how to set it up.
+![Koara's desktop interface](docs/Ui.png)
 
-## Setting up in Intellij
+Koara is a modern desktop chatbot for managing personal tasks and training-client records. It combines fast command-based interaction with automatic local storage, clear error feedback, and a focused JavaFX interface.
 
-Prerequisites: JDK 25, update Intellij to the most recent version.
+## Features
 
-1. Open Intellij (if you are not in the welcome screen, click `File` > `Close Project` to close the existing project first)
-1. Open the project into Intellij as follows:
-   1. Click `Open`.
-   1. Select the project directory, and click `OK`.
-   1. If there are any further prompts, accept the defaults.
-1. Configure the project to use **JDK 25** (not other versions) as explained in [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).<br>
-   In the same dialog, set the **Project language level** field to the `SDK default` option.
-1. After that, locate the `src/main/java/Koara.java` file, right-click it, and choose `Run Koara.main()` (if the code editor is showing compile errors, try restarting the IDE). If the setup is correct, Koara should start an interactive session like the one below.
-   Use `todo DESCRIPTION` to add a todo, `deadline DESCRIPTION /by DATE_OR_TIME` to add a deadline, or `event DESCRIPTION /from START /to END` to add an event. Dates and times are kept as text. Enter `list` to view all tasks, `mark NUMBER` to mark a task, `unmark NUMBER` to reverse its status, `delete NUMBER` to remove a task, or `bye` to exit. Invalid or incomplete commands display an error message and do not change the task list. Tasks are stored in an `ArrayList` while Koara is running, but are not saved after the program ends. Below is an example of how we can use Koara.
-   ```
-       ____________________________________________________________
-         _  __  ___      _      ____       _
-        | |/ / / _ \    / \    |  _ \     / \
-        | ' / | | | |  / _ \   | |_) |   / _ \
-        | . \ | |_| | / ___ \  |  _ <   / ___ \
-        |_|\_\ \___/ /_/   \_\ |_| \_\ /_/   \_\
-        Hello! I'm Koara.
-        What can I do for you?
-       ____________________________________________________________
-   todo
-       ____________________________________________________________
-        Unlucky!!! The description of a todo task cannot be empty. Try typing something more.
-       ____________________________________________________________
-   blah
-       ____________________________________________________________
-        What is that bro!!! Sorry ah, I don't know what that means :-(
-       ____________________________________________________________
-   todo read book
-       ____________________________________________________________
-        Got it. I've added this task:
-          [T][ ] read book
-        Now you have 1 tasks in the list.
-       ____________________________________________________________
-   deadline return book /by Sunday
-       ____________________________________________________________
-        Got it. I've added this task:
-          [D][ ] return book (by: Sunday)
-        Now you have 2 tasks in the list.
-       ____________________________________________________________
-   event project meeting /from Mon 2pm /to 4pm
-       ____________________________________________________________
-        Got it. I've added this task:
-          [E][ ] project meeting (from: Mon 2pm to: 4pm)
-        Now you have 3 tasks in the list.
-       ____________________________________________________________
-   list
-       ____________________________________________________________
-        Here are the tasks in your list:
-        1.[T][ ] read book
-        2.[D][ ] return book (by: Sunday)
-        3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
-       ____________________________________________________________
-   mark 2
-       ____________________________________________________________
-        Nice! I've marked this task as done:
-          [D][X] return book (by: Sunday)
-       ____________________________________________________________
-   unmark 2
-       ____________________________________________________________
-        OK, I've marked this task as not done yet:
-          [D][ ] return book (by: Sunday)
-       ____________________________________________________________
-   delete 3
-       ____________________________________________________________
-        Noted. I've removed this task:
-          [E][ ] project meeting (from: Mon 2pm to: 4pm)
-        Now you have 2 tasks in the list.
-       ____________________________________________________________
-   bye
-       ____________________________________________________________
-        Bye. Koara hopes to see you again soon!
-       ____________________________________________________________
-   ```
+- Create to-dos, deadlines, and events using validated ISO dates.
+- List, search, mark, unmark, and delete tasks.
+- Add, list, search, edit, and delete client records.
+- Save tasks and clients automatically and recover gracefully from missing or invalid data files.
+- Highlight invalid commands without ending the session or corrupting in-memory data.
 
-Koara uses a custom `KoaraException` to handle invalid task descriptions, missing deadline or event information, unknown commands, and invalid task numbers. After displaying an error, Koara continues accepting commands while preserving the existing task list and completion states.
+See the **[Koara User Guide](https://itzkhoadao.github.io/ip/)** for every command, example, and data-file detail.
 
-**Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
+## Run from source
+
+Koara requires **Java 25**.
+
+1. Clone this repository and open a terminal in the project root.
+2. Build the cross-platform application JAR:
+   - Windows: `gradlew.bat clean shadowJar`
+   - macOS/Linux: `./gradlew clean shadowJar`
+3. Start Koara with `java -jar build/libs/koara.jar`.
+
+In IntelliJ IDEA, configure the project SDK and language level as Java 25, then run `koara.gui.Launcher`.
+
+## Development checks
+
+Run the complete automated test and code-quality suite before committing:
+
+- Windows: `gradlew.bat check`
+- macOS/Linux: `./gradlew check`
+
+The GitHub Actions workflow runs the same checks with Java 25 on Windows, macOS, and Ubuntu.

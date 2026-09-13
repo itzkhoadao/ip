@@ -114,16 +114,35 @@ public class Koara {
      * @return User-facing response to the command.
      */
     public String getResponse(String command) {
+        return getCommandResult(command).message();
+    }
+
+    /**
+     * Executes a command and returns its message together with its success status.
+     *
+     * @param command Command entered by the user.
+     * @return Result containing the response text and whether it represents an error.
+     */
+    public CommandResult getCommandResult(String command) {
         assert command != null : "Command must not be null";
         if (command.equals(EXIT_COMMAND)) {
-            return "Bye. Koara hopes to see you again soon!";
+            return new CommandResult("Bye. Koara hopes to see you again soon!", false);
         }
 
         try {
-            return executeCommand(command);
+            return new CommandResult(executeCommand(command), false);
         } catch (KoaraException exception) {
-            return exception.getMessage();
+            return new CommandResult(exception.getMessage(), true);
         }
+    }
+
+    /**
+     * Describes the text and outcome of a processed command.
+     *
+     * @param message User-facing response text.
+     * @param isError Whether the command failed validation or persistence.
+     */
+    public record CommandResult(String message, boolean isError) {
     }
 
     /**

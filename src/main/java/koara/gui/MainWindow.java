@@ -13,6 +13,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import koara.Koara;
+import koara.Koara.CommandResult;
 
 /**
  * Controls the main chatbot window defined in {@code MainWindow.fxml}.
@@ -23,7 +24,6 @@ public class MainWindow extends AnchorPane {
     private static final String WELCOME_MESSAGE =
             "Hello! I'm Koara.\nWhat can I do for you?";
 
-    private final Image userImage = loadImage("/images/DaUser.png");
     private final Image koaraImage = loadImage("/images/DaKoara.png");
 
     @FXML
@@ -51,6 +51,7 @@ public class MainWindow extends AnchorPane {
         assert sendButton != null : "FXML loader must inject the send button";
         dialogContainer.heightProperty().addListener(
                 observable -> scrollPane.setVvalue(SCROLL_BOTTOM_POSITION));
+        Platform.runLater(userInput::requestFocus);
     }
 
     /**
@@ -61,7 +62,7 @@ public class MainWindow extends AnchorPane {
     public void setKoara(Koara koara) {
         this.koara = Objects.requireNonNull(koara);
         addKoaraDialog(WELCOME_MESSAGE);
-        koara.getStartupError().ifPresent(this::addKoaraDialog);
+        koara.getStartupError().ifPresent(this::addErrorDialog);
     }
 
     /**
@@ -70,11 +71,17 @@ public class MainWindow extends AnchorPane {
     @FXML
     private void handleUserInput() {
         assert koara != null : "Koara must be set before processing input";
-        String input = userInput.getText();
-        String response = koara.getResponse(input);
-        dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getKoaraDialog(response, koaraImage));
+        String input = userInput.getText().trim();
+        if (input.isEmpty()) {
+            addErrorDialog("Please enter a command before sending.");
+            return;
+        }
+
+        CommandResult result = koara.getCommandResult(input);
+        DialogBox responseDialog = result.isError()
+                ? DialogBox.getErrorDialog(result.message(), koaraImage)
+                : DialogBox.getKoaraDialog(result.message(), koaraImage);
+        dialogContainer.getChildren().addAll(DialogBox.getUserDialog(input), responseDialog);
         userInput.clear();
 
         if (input.equals("bye")) {
@@ -94,6 +101,16 @@ public class MainWindow extends AnchorPane {
     private void addKoaraDialog(String response) {
         dialogContainer.getChildren().add(
                 DialogBox.getKoaraDialog(response, koaraImage));
+    }
+
+    /**
+     * Adds a visually prominent error response from Koara.
+     *
+     * @param response Error response to display.
+     */
+    private void addErrorDialog(String response) {
+        dialogContainer.getChildren().add(
+                DialogBox.getErrorDialog(response, koaraImage));
     }
 
     /**

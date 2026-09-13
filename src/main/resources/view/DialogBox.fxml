@@ -8,30 +8,31 @@
 <fx:root alignment="TOP_RIGHT"
          maxHeight="1.7976931348623157E308"
          maxWidth="1.7976931348623157E308"
-         prefWidth="420.0"
+         styleClass="dialog-row"
          type="javafx.scene.layout.HBox"
          xmlns="http://javafx.com/javafx/17"
          xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <Label fx:id="dialogText"
-               maxWidth="320.0"
+               maxWidth="1.7976931348623157E308"
                minHeight="-Infinity"
-               text="Label"
+               styleClass="message-bubble"
+               text="Message"
                wrapText="true">
             <HBox.margin>
-                <Insets left="7.0" right="7.0" />
+                <Insets left="8.0" right="8.0" />
             </HBox.margin>
             <padding>
-                <Insets bottom="6.0" left="6.0" right="6.0" top="6.0" />
+                <Insets bottom="9.0" left="12.0" right="12.0" top="9.0" />
             </padding>
         </Label>
         <ImageView fx:id="displayPicture"
-                   fitHeight="64.0"
-                   fitWidth="64.0"
+                   fitHeight="36.0"
+                   fitWidth="36.0"
                    pickOnBounds="true"
                    preserveRatio="true" />
     </children>
     <padding>
-        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+        <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
     </padding>
 </fx:root>
